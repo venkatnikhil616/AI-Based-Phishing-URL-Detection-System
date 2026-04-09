@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Phishing URL Detector</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+<body>
+
+<div class="container">
+    <h1>🔐 Phishing URL Detector</h1>
+
+    <form action="/predict" method="post" onsubmit="showLoader()">
+        <input type="text" name="url" placeholder="Enter URL (e.g., https://example.com)" required>
+        <button type="submit">Analyze</button>
+    </form>
+
+    <!-- Loader -->
+    <div id="loader" class="loader" style="display:none;"></div>
+
+    {% if prediction_text %}
+        <div class="result
+            {% if 'Legitimate' in prediction_text %}safe
+            {% elif 'Phishing' in prediction_text %}danger
+            {% endif %}">
+            {{ prediction_text }}
+        </div>
+    {% endif %}
+</div>
+
+<script>
+function showLoader() {
+    document.getElementById("loader").style.display = "block";
+}
+</script>
+
+</body>
+</html>
