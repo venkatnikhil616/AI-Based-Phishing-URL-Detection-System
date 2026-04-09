@@ -46,8 +46,8 @@ This is an **all-in-one implementation**, meaning:
 Install dependencies:
 pip install -r requirements.txt
 After installing requirements you may see:
---> [Process completed (signal 9) - press Enter]
--->Then press enter, the terminal closes, then open the terminal again and go back to the repository location
+1. [Process completed (signal 9) - press Enter]
+2.Then press enter, the terminal closes, then open the terminal again and go back to the repository location
 
 ## How to Run
 
