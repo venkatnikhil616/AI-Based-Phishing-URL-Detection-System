@@ -54,7 +54,7 @@ After installing requirements you may see:
 
 After repository cloning:
 1. cd AI-Based-Phishing-URL-Detection-System
-2. pip3 install -r requirements.txt
+2. pip3 install -r requirements.txt or pip3 install -r requirements.txt --break-system-packages
 3. Run the script: python -m models.train_model
 4. Run the script: python -m app.app
 5. Open browser:http://127.0.0.1:5000/
