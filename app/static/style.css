@@ -4,7 +4,7 @@ body {
     /* Background image with overlay */
     background:
         linear-gradient(rgba(30, 60, 114, 0.75), rgba(42, 82, 152, 0.75)),
-        url("../bg.jpg");
+        url("bg.jpg");
 
     background-size: cover;
     background-position: center;
