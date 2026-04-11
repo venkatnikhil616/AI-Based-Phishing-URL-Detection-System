@@ -1,6 +1,16 @@
 body {
     font-family: 'Segoe UI', sans-serif;
-    background: linear-gradient(135deg, #1e3c72, #2a5298);
+
+    /* Background image with overlay */
+    background:
+        linear-gradient(rgba(30, 60, 114, 0.75), rgba(42, 82, 152, 0.75)),
+        url("../bg.jpg");
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed; /* smooth scrolling effect */
+
     display: flex;
     justify-content: center;
     align-items: center;
@@ -9,12 +19,15 @@ body {
 
 /* container */
 .container {
-    background: white;
+    background: rgba(255, 255, 255, 0.95); /* slight transparency */
+    backdrop-filter: blur(10px); /* glass effect */
+
     padding: 40px;
     border-radius: 15px;
     width: 450px;
     text-align: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
     animation: fadeIn 0.8s ease-in-out;
 }
 
@@ -71,12 +84,13 @@ button:hover {
 pre {
     margin: 0;
     white-space: pre-wrap;
+    line-height: 1.5;
 }
 
 /* badges */
 .badge {
     display: inline-block;
-    padding: 5px 10px;
+    padding: 6px 12px;
     border-radius: 6px;
     font-size: 12px;
     margin-top: 5px;
