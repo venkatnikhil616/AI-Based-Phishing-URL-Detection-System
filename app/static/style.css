@@ -12,9 +12,9 @@ body {
     background: white;
     padding: 40px;
     border-radius: 15px;
-    width: 420px;
+    width: 450px;
     text-align: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
     animation: fadeIn 0.8s ease-in-out;
 }
 
@@ -37,7 +37,7 @@ input {
 input:focus {
     border-color: #2a5298;
     outline: none;
-    box-shadow: 0 0 5px rgba(42,82,152,0.5);
+    box-shadow: 0 0 6px rgba(42,82,152,0.6);
 }
 
 /* button */
@@ -53,25 +53,55 @@ button {
 
 button:hover {
     background: #1e3c72;
+    transform: scale(1.05);
 }
 
-/* result */
-.result {
+/* result box */
+.result-box {
     margin-top: 20px;
-    padding: 12px;
-    border-radius: 8px;
-    font-weight: bold;
+    padding: 15px;
+    border-radius: 10px;
+    background: #f4f6f8;
+    text-align: left;
+    font-size: 14px;
     animation: slideUp 0.5s ease;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
 }
 
-.safe {
+pre {
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+/* badges */
+.badge {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    margin-top: 5px;
+    font-weight: bold;
+}
+
+/* status colors */
+.live {
     background: #d4edda;
     color: #155724;
 }
 
-.danger {
+.dead {
     background: #f8d7da;
     color: #721c24;
+}
+
+.safe {
+    background: #e2f0ff;
+    color: #084298;
+}
+
+.unsafe {
+    background: #fde2e2;
+    color: #842029;
 }
 
 /* loader animation */
