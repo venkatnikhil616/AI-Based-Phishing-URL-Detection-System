@@ -12,7 +12,7 @@
 <div class="container">
     <h1>🔐 Phishing URL Detector</h1>
 
-    <form action="/predict" method="post" onsubmit="showLoader()">
+    <form action="{{ url_for('predict') }}" method="post" onsubmit="showLoader()">
         <input type="text" name="url" placeholder="Enter URL (e.g., https://example.com)" required>
         <button type="submit">Analyze</button>
     </form>
@@ -25,7 +25,7 @@
             {% if 'Legitimate' in prediction_text %}safe
             {% elif 'Phishing' in prediction_text %}danger
             {% endif %}">
-            {{ prediction_text }}
+            {{ prediction_text | replace('\n', '<br>') | safe }}
         </div>
     {% endif %}
 </div>
