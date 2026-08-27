@@ -1,10 +1,4 @@
-����sklearn.linear_model._logistic��LogisticRegression��fit_intercept���intercept_scaling�K��C-�C�G?��
-                                    class_weight�balanced��
-   random_state�N�solver��lbfgs�max_iter�M��
-                                            multi_class��
-deprecated��verbose�K�
-warm_start���n_jobs�Nl1_ratio�N�n_features_in_�K&classes_��numpy._core.multiarray��
-                           _reconstruct����numpy��ndarray���K��Cb���R�(KK��h�dtype����i8�����R�(K�<�NNNJ����J����Kt�b�C�t�b�n_iter_�hhK��h!��R�(KK��h&�i4�����R�(Kh*NNNJ����J����Kt�b�C �t�b�coef_�hhK��h!��R�(KKK&��h&�f8�����R�(Kh*NNNJ����J����Kt�b�B0a�.T&t�?�Z`t���Z`t���Z`t��?�Z`t����?�q�G��¿4�Y��?���=�b���Z��-��'Z�)�*�?hm�
+����sklearn.linear_model._logistic��LogisticRegression���)��}�(�penalty��l2��dual���tol�fit_intercept���intercept_scaling�K�                                                                                        class_weight�balanced��                                                                                        random_state�N�solver��lbfgs�max_iter�M��                                                                                        multi_class��                                                               deprecated��verbose�K�                                                                  warm_start���n_jobs�Nl1_ratio�N�n_features_in_�K&classes_��numpy._core.multiarray��                                                                                        _reconstruct����numpy��ndarray���K��Cb���R�(KK��h�dtype����i8�����R�(K�<�NNNJ����J����Kt�b�C�t�b�n_iter_�hhK��h!��R�(KK��h&�i4�����R�(Kh*NNNJ����J����Kt�b�C �t�b�coef_�hhK��h!��R�(KKK&��h&�f8�����R�(Kh*NNNJ����J����Kt�b�B0a�.T&t�?�Z`t���Z`t���Z`t��?�Z`t��?�G�[tl�?�ǽ--�����?�q�G��¿4�Y��?���=�b���Z��-��'Z�)�*�?hm�
 ����ǽ--����J�Äÿӯa_W��,G�hk=�?�
                               �g��J��~+���a�Ws�������?�=�O���
 EC�L��4�%�%��?7�GV[˿�I�����%nW��?,�)�0�?��a�Ws�)\WV�?hm�
