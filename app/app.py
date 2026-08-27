@@ -17,7 +17,13 @@ BASE_DIR = os.path.abspath(
     )
 )
 
-# Make project root available for imports
+APP_DIR = os.path.dirname(__file__)
+
+
+# --------------------------------------------------
+# PYTHON IMPORT PATH
+# --------------------------------------------------
+
 if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
 
@@ -46,8 +52,6 @@ from utils.url_checker import (
 # FLASK APPLICATION
 # --------------------------------------------------
 
-APP_DIR = os.path.dirname(__file__)
-
 app = Flask(
     __name__,
     template_folder=os.path.join(
@@ -62,13 +66,14 @@ app = Flask(
 
 
 # --------------------------------------------------
-# MODEL PATHS
+# MODEL DIRECTORY
 # --------------------------------------------------
 
 MODEL_DIR = os.path.join(
     BASE_DIR,
     "models"
 )
+
 
 MODEL_PATH = os.path.join(
     MODEL_DIR,
@@ -90,19 +95,21 @@ VECTORIZER_PATH = os.path.join(
 # LOAD PICKLE FILE
 # --------------------------------------------------
 
-def load_pickle_file(
-    file_path,
-    component_name
-):
+def load_pickle_file(file_path, component_name):
     """
-    Load a serialized ML component from disk.
+    Load a serialized machine-learning component.
+
+    The model files must already exist in the
+    deployed repository. They are generated locally
+    by models/train_model.py.
     """
 
     if not os.path.isfile(file_path):
         raise FileNotFoundError(
-            f"{component_name} not found: "
+            f"{component_name} not found at: "
             f"{file_path}. "
-            "Run models/train_model.py first."
+            "Make sure the trained .pkl files are "
+            "included in the repository."
         )
 
     try:
@@ -114,7 +121,8 @@ def load_pickle_file(
 
     except Exception as exc:
         raise RuntimeError(
-            f"Failed to load {component_name}: {exc}"
+            f"Failed to load {component_name}: "
+            f"{exc}"
         ) from exc
 
 
@@ -168,6 +176,7 @@ def predict():
         ""
     ).strip()
 
+
     # --------------------------------------------------
     # INPUT VALIDATION
     # --------------------------------------------------
@@ -181,9 +190,28 @@ def predict():
             )
         )
 
-    url = normalize_url(
-        user_input
-    )
+
+    try:
+
+        url = normalize_url(
+            user_input
+        )
+
+    except Exception as exc:
+
+        app.logger.error(
+            "URL normalization failed: %s",
+            exc,
+            exc_info=True
+        )
+
+        return render_template(
+            "index.html",
+            prediction_text=(
+                "Unable to process the URL."
+            )
+        )
+
 
     if not is_valid_url(url):
 
@@ -193,6 +221,7 @@ def predict():
                 "Please enter a valid URL."
             )
         )
+
 
     # --------------------------------------------------
     # URL REACHABILITY
@@ -220,6 +249,7 @@ def predict():
         status = (
             "⚠️ Unable to determine"
         )
+
 
     # --------------------------------------------------
     # FEATURE EXTRACTION
@@ -267,6 +297,7 @@ def predict():
             )
         )
 
+
     # --------------------------------------------------
     # MACHINE LEARNING PREDICTION
     # --------------------------------------------------
@@ -302,6 +333,7 @@ def predict():
             )
         )
 
+
     # --------------------------------------------------
     # VIRUSTOTAL
     # --------------------------------------------------
@@ -320,6 +352,7 @@ def predict():
         )
 
         vt_result = "Unavailable"
+
 
     # --------------------------------------------------
     # GOOGLE SAFE BROWSING
@@ -342,29 +375,29 @@ def predict():
 
         google_result = "Unavailable"
 
+
     # --------------------------------------------------
     # RESULT
     # --------------------------------------------------
 
     if conf:
 
-        output = f"""
-{result} ({conf}% confidence)
-
-Status: {status}
-VirusTotal: {vt_result}
-Google Safe Browsing: {google_result}
-"""
+        output = (
+            f"{result} ({conf}% confidence)\n\n"
+            f"Status: {status}\n"
+            f"VirusTotal: {vt_result}\n"
+            f"Google Safe Browsing: {google_result}"
+        )
 
     else:
 
-        output = f"""
-{result}
+        output = (
+            f"{result}\n\n"
+            f"Status: {status}\n"
+            f"VirusTotal: {vt_result}\n"
+            f"Google Safe Browsing: {google_result}"
+        )
 
-Status: {status}
-VirusTotal: {vt_result}
-Google Safe Browsing: {google_result}
-"""
 
     return render_template(
         "index.html",
