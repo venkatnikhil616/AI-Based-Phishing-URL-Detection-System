@@ -1,20 +1,18 @@
-���sklearn.feature_extraction.text��TfidfVectorizer���)��}�(�input��content�encoding��utf-8��                                                        decode_error��stricstrip_accents�N�                                                        preprocessor�N� tokenizer�Nanalyzer��wor(?u)\b\w\w+\b��se���                                    stop_words�N�max_df�G?��min_df�K�                                                        max_features�N�                                                        ngram_range�KK���
-vocabulary�N�binary���dtype��numpy��float64����norm��l2��use_idf���                                             smooth_idf���                                                        sublinear_tf���_tfidf�h�TfidfTransformer���)��}�(hh h!�h"�h#��n_features_in_�K�idf_��numpy._core.multiarray��                                                        _reconstruct���h�ndarray���K��Cb���R�(KK��h�dtype����f8�����R�(K�<�NNNJ����J����Kt�b�C��{��           _ �@��o41                                    @�W:�@
-@����                                                   @S��
-    �1�?���%�0@�C�]                                                        @���%�0@T��6t*@                                                        �~                    �?                                                        �~
-�?�W:�@j\��@�b�x)�@bK$-�        @T��6t*@c�ϟ             M@c�ϟ
+���sklearn.feature_extraction.text��TfidfVectorizer���)��}�(�input��content�encoding��utf-8��                                                                                   strip_accents�N�r��strict��                                                             (?u)\b\w\w+\b�� preprocessor�N� tokenizer�Nanalyzer��word��     lowercase���            stop_words�N�max_df�G?��min_df�K�                                                                                        max_features�N�                                                                                        ngram_range�KK���                       vocabulary�N�binary���dtype��numpy��float64����norm��l2��use_idf���                     smooth_idf���                                                                                        sublinear_tf���_tfidf�h�TfidfTransformer���)��}�(hh h!�h"�h#��n_features_in_�K�idf_��numpy._core.multiarray��                                                                                        _reconstruct���h�ndarray���K��Cb���R�(KK��h�dtype����f8�����R�(K�<�NNNJ����J����Kt�b�C��{��
+_ �@��o41                            @�W:�@                                             @����
+@S��                                                                                        �1�?���%�0@�C�]                                                                                        @���%�0@T��6t*@                                                                                        �~
+�?
+  �~
+�?�W:�@j\��@�b�x)�@bK$-�        @T��6t*@c�ϟ
+M@c�ϟ
 M@�\�j
-@y���@j\��@
-           �~
-�?c�ϟ
-M@���%�0@ %�%��
-               @$q�0�
-                     @c�ϟ
-M@g|��\Y
+@y���@j\��@                                                                                        �~
+�?c�ϟ                                                                                   M@���%�0@ %�%��
+               @$q�0�                                                                                        @c�ϟ                                                               M@g|��\Y
 @
  �~
 �?.�����@�t�b�_sklearn_version��1.7.2�ub�fixed_vocabulary_���_stop_words_id�J� ��
-                         vocabulary_�}�(�http�K
+                                                                                 vocabulary_�}�(�http�K
 �bonus�K�verify�K�secure�K�com�K�login�K�bank�K�win�K�update�K�https�K
-              �www�K�amazon�K�in�K
-                                  �free�K�account�K�twitter�K�quora�K�paypal�K�google�K �       microsoft�K�   wstackoverflow�Kuh>h?ub.flix�K�apple�K�youtube�K�m�K
+                                                                      �www�K�amazon�K�in�K
+  �free�K�account�K�twitter�K�quora�K�paypal�K�google�K �       microsoft�K�    wikipedistackoverflow�Kuh>h?ub.flix�K�apple�K�youtube�K�
