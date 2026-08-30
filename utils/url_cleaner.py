@@ -26,8 +26,14 @@ def clean_url(url):
     if not url:
         return ""
 
-    # Remove whitespace characters.
+    # Strip surrounding quotes, brackets, and markdown formatting
+    url = url.strip("\"'“”‘’<>(){}[]`")
+
+    # Remove internal whitespace characters
     url = re.sub(r"\s+", "", url)
+
+    # Strip trailing punctuation (e.g. trailing comma, semicolon, period)
+    url = re.sub(r"[,;.]+$", "", url)
 
     # Add a default scheme if one is missing.
     if not re.match(
