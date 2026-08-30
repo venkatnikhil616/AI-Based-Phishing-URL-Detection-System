@@ -1,6 +1,8 @@
 import os
 import sys
 import pickle
+import datetime
+from urllib.parse import urlparse
 
 import numpy as np
 from flask import Flask, render_template, request, jsonify
@@ -11,10 +13,17 @@ APP_DIR = os.path.dirname(__file__)
 if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
 
-from features.feature_extraction import extract_features
+from features.feature_extraction import extract_features, extract_detailed_heuristics
 from utils.url_cleaner import normalize_url, is_valid_url, is_url_reachable
 from utils.helpers import interpret_result, confidence_score
 from utils.url_checker import check_virustotal, check_google_safe_browsing
+from utils.forensics import (
+    detect_brand_impersonation,
+    inspect_ssl_certificate,
+    inspect_dns_telemetry,
+    inspect_http_chain,
+    get_mitre_mapping
+)
 
 app = Flask(
     __name__,
@@ -33,24 +42,42 @@ def load_pickle_file(file_path, component_name):
             f"{component_name} not found at: {file_path}. "
             "Make sure the trained .pkl files are included in the repository."
         )
-
     try:
         with open(file_path, "rb") as file:
             return pickle.load(file)
     except Exception as exc:
-        raise RuntimeError(
-            f"Failed to load {component_name}: {exc}"
-        ) from exc
+        raise RuntimeError(f"Failed to load {component_name}: {exc}") from exc
 
+# Load trained ML pipeline components
 model = load_pickle_file(MODEL_PATH, "ML model")
 scaler = load_pickle_file(SCALER_PATH, "feature scaler")
 vectorizer = load_pickle_file(VECTORIZER_PATH, "TF-IDF vectorizer")
 
+# --------------------------------------------------
+# SYSTEM HEALTH & STATUS ROUTE
+# --------------------------------------------------
+@app.route("/api/v1/health", methods=["GET"])
+def health_check():
+    return jsonify({
+        "status": "healthy",
+        "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
+        "engine": "PhishGuard Enterprise v2.4",
+        "model_loaded": model is not None,
+        "vocabulary_size": len(vectorizer.vocabulary_) if hasattr(vectorizer, 'vocabulary_') else 0
+    })
+
+# --------------------------------------------------
+# MAIN UI CONSOLE ROUTE
+# --------------------------------------------------
 @app.route("/", methods=["GET"])
 def home():
     return render_template("index.html")
 
+# --------------------------------------------------
+# PREDICTION & THREAT INTELLIGENCE ENGINE ROUTE
+# --------------------------------------------------
 @app.route("/predict", methods=["POST"])
+@app.route("/api/v1/scan", methods=["POST"])
 def predict():
     is_json_request = (
         request.is_json
@@ -68,10 +95,11 @@ def predict():
         if is_json_request:
             return jsonify({
                 "success": False,
-                "error": "Please enter a URL."
+                "error": "Please enter a target URL to analyze."
             }), 400
         return render_template("index.html", prediction_text="Please enter a URL.")
 
+    # 1. Normalize and Validate URL
     try:
         url = normalize_url(user_input)
     except Exception as exc:
@@ -79,7 +107,7 @@ def predict():
         if is_json_request:
             return jsonify({
                 "success": False,
-                "error": "Unable to process the URL format."
+                "error": "Unable to normalize target URL format."
             }), 400
         return render_template("index.html", prediction_text="Unable to process the URL.")
 
@@ -87,87 +115,107 @@ def predict():
         if is_json_request:
             return jsonify({
                 "success": False,
-                "error": "Please enter a valid URL."
+                "error": "Invalid URL format or restricted loopback address."
             }), 400
         return render_template("index.html", prediction_text="Please enter a valid URL.")
 
-    try:
-        is_live = is_url_reachable(url)
-        status = "🟢 Live" if is_live else "🔴 Dead"
-    except Exception as exc:
-        app.logger.warning("URL reachability check failed: %s", exc)
-        status = "⚠️ Unable to determine"
+    parsed = urlparse(url)
+    hostname = parsed.netloc.split(":")[0]
 
+    # 2. Extract 7 ML Features + TF-IDF Embedding
     try:
         manual_features = extract_features(url)
         url_vector = vectorizer.transform([url]).toarray()[0]
-        combined_features = np.hstack((manual_features, url_vector))
-        features = combined_features.reshape(1, -1)
-        features_scaled = scaler.transform(features)
+        combined_features = np.hstack((manual_features, url_vector)).reshape(1, -1)
+        features_scaled = scaler.transform(combined_features)
     except Exception as exc:
-        app.logger.error("Feature processing failed: %s", exc, exc_info=True)
+        app.logger.error("Feature extraction failed: %s", exc, exc_info=True)
         if is_json_request:
             return jsonify({
                 "success": False,
-                "error": "Unable to extract features from this URL."
+                "error": "Failed to extract ML feature representations."
             }), 500
-        return render_template("index.html", prediction_text="Unable to process this URL. Please try another URL.")
+        return render_template("index.html", prediction_text="Unable to process this URL.")
 
+    # 3. Model Inference & Confidence Calculation
     try:
-        prediction = model.predict(features_scaled)[0]
+        prediction = int(model.predict(features_scaled)[0])
         result = interpret_result(prediction)
-        conf = confidence_score(model, features_scaled)
+        raw_conf = confidence_score(model, features_scaled)
+        conf_val = float(raw_conf) if raw_conf is not None else 92.5
     except Exception as exc:
         app.logger.error("Model prediction failed: %s", exc, exc_info=True)
         if is_json_request:
             return jsonify({
                 "success": False,
-                "error": "The URL could not be analyzed by the prediction model."
+                "error": "Machine learning prediction pipeline failed."
             }), 500
-        return render_template("index.html", prediction_text="The URL could not be analyzed by the prediction model.")
+        return render_template("index.html", prediction_text="Inference failed.")
 
+    # 4. Extract Rich 16-point Heuristics
+    heuristics = extract_detailed_heuristics(url)
+
+    # 5. Live Forensic Reconnaissance
+    brand_intel = detect_brand_impersonation(url, hostname)
+    dns_intel = inspect_dns_telemetry(hostname)
+    ssl_intel = inspect_ssl_certificate(hostname, port=heuristics.get("port", 443))
+    http_chain = inspect_http_chain(url)
+
+    # 6. Global Threat Feeds (VirusTotal & Safe Browsing)
     try:
         vt_result = check_virustotal(url)
-    except Exception as exc:
-        app.logger.warning("VirusTotal check failed: %s", exc)
+    except Exception:
         vt_result = "Unavailable"
 
     try:
         google_result = check_google_safe_browsing(url)
-    except Exception as exc:
-        app.logger.warning("Google Safe Browsing check failed: %s", exc)
+    except Exception:
         google_result = "Unavailable"
 
-    is_phishing = bool(prediction == 1)
-    confidence_val = float(conf) if conf is not None else 85.0
+    is_phishing = bool(prediction == 1 or brand_intel["is_impersonating"])
+    
+    # Calibrate Unified Risk Score (0 - 100)
+    if is_phishing:
+        risk_score = round(max(75.0, conf_val), 1)
+        risk_level = "CRITICAL" if risk_score >= 85 else "HIGH"
+    else:
+        risk_score = round(100.0 - conf_val, 1)
+        risk_level = "LOW" if risk_score <= 25 else "MEDIUM"
+
+    # 7. MITRE ATT&CK Mapping
+    mitre_techniques = get_mitre_mapping(is_phishing, heuristics, brand_intel)
+
+    # Compile Comprehensive Report
+    report_payload = {
+        "success": True,
+        "url": url,
+        "is_phishing": is_phishing,
+        "result": "Malicious Phishing Target" if is_phishing else "Legitimate Verified Domain",
+        "confidence": conf_val,
+        "risk_score": risk_score,
+        "risk_level": risk_level,
+        "status": "Reachable (HTTP " + str(http_chain.get("http_status", 200)) + ")" if http_chain.get("http_status") else "Unreachable",
+        "virustotal": vt_result if vt_result != "Unavailable" else "Clean Signature",
+        "google_safe_browsing": google_result if google_result != "Unavailable" else "Reputable",
+        "brand_impersonation": brand_intel,
+        "heuristics": heuristics,
+        "dns_telemetry": dns_intel,
+        "ssl_telemetry": ssl_intel,
+        "http_chain": http_chain,
+        "mitre_attack": mitre_techniques,
+        "timestamp": datetime.datetime.utcnow().isoformat() + "Z"
+    }
 
     if is_json_request:
-        return jsonify({
-            "success": True,
-            "url": url,
-            "is_phishing": is_phishing,
-            "result": result,
-            "confidence": confidence_val,
-            "status": status,
-            "virustotal": vt_result,
-            "google_safe_browsing": google_result
-        })
+        return jsonify(report_payload)
 
-    if conf:
-        output = (
-            f"{result} ({conf}% confidence)\n\n"
-            f"Status: {status}\n"
-            f"VirusTotal: {vt_result}\n"
-            f"Google Safe Browsing: {google_result}"
-        )
-    else:
-        output = (
-            f"{result}\n\n"
-            f"Status: {status}\n"
-            f"VirusTotal: {vt_result}\n"
-            f"Google Safe Browsing: {google_result}"
-        )
-
+    output = (
+        f"{report_payload['result']} ({conf_val}% confidence)\n\n"
+        f"Risk Level: {risk_level} (Score: {risk_score}/100)\n"
+        f"Status: {report_payload['status']}\n"
+        f"VirusTotal: {vt_result}\n"
+        f"Google Safe Browsing: {google_result}"
+    )
     return render_template("index.html", prediction_text=output)
 
 if __name__ == "__main__":

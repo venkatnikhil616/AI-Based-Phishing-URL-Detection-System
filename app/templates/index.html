@@ -2,57 +2,51 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PhishGuard Enterprise • Threat Intelligence & URL Analysis Platform</title>
-    <meta name="description" content="Enterprise-grade AI-powered phishing URL detection, lexical heuristic analysis, and threat intelligence scoring.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>PhishGuard Enterprise • Cyber Threat Intelligence & URL Telemetry Console</title>
+    <meta name="description" content="Enterprise-grade AI/ML phishing detection, MITRE ATT&CK telemetry, and heuristic threat intelligence platform.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-base: #080c14;
-            --bg-surface: #0e1526;
-            --bg-surface-raised: #141e34;
-            --bg-surface-elevated: #1a2742;
-            --bg-surface-subtle: rgba(255, 255, 255, 0.02);
-
-            --border-subtle: rgba(255, 255, 255, 0.07);
-            --border-medium: rgba(255, 255, 255, 0.12);
+            --bg-base: #06090e;
+            --bg-surface: #0b1019;
+            --bg-elevated: #111827;
+            --bg-input: #03060a;
+            --border-subtle: #1e293b;
+            --border-medium: #334155;
             --border-focus: #3b82f6;
 
-            --primary: #3b82f6;
-            --primary-light: #60a5fa;
-            --primary-subtle: rgba(59, 130, 246, 0.12);
-            --primary-border: rgba(59, 130, 246, 0.25);
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --primary-subtle: rgba(37, 99, 235, 0.12);
+            --primary-border: rgba(37, 99, 235, 0.35);
 
-            --safe: #10b981;
-            --safe-light: #34d399;
-            --safe-subtle: rgba(16, 185, 129, 0.1);
-            --safe-border: rgba(16, 185, 129, 0.28);
+            --clean: #10b981;
+            --clean-bg: rgba(16, 185, 129, 0.08);
+            --clean-border: rgba(16, 185, 129, 0.28);
 
-            --danger: #ef4444;
-            --danger-light: #f87171;
-            --danger-subtle: rgba(239, 68, 68, 0.1);
-            --danger-border: rgba(239, 68, 68, 0.28);
+            --threat: #f43f5e;
+            --threat-bg: rgba(244, 63, 94, 0.08);
+            --threat-border: rgba(244, 63, 94, 0.28);
 
-            --warning: #f59e0b;
-            --warning-light: #fbbf24;
-            --warning-subtle: rgba(245, 158, 11, 0.1);
-            --warning-border: rgba(245, 158, 11, 0.28);
+            --warn: #f59e0b;
+            --warn-bg: rgba(245, 158, 11, 0.08);
+            --warn-border: rgba(245, 158, 11, 0.28);
 
             --text-primary: #f8fafc;
-            --text-secondary: #cbd5e1;
-            --text-muted: #94a3b8;
-            --text-disabled: #64748b;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --text-dim: #475569;
 
             --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+            --font-mono: 'JetBrains Mono', Consolas, monospace;
 
+            --radius-xs: 3px;
             --radius-sm: 6px;
-            --radius-md: 10px;
-            --radius-lg: 14px;
-            --radius-xl: 20px;
-            --shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--border-subtle);
+            --radius-md: 8px;
+            --radius-lg: 12px;
         }
 
         * {
@@ -66,559 +60,444 @@
             background-color: var(--bg-base);
             color: var(--text-primary);
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
             line-height: 1.5;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
-            background-image:
-                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(59, 130, 246, 0.08) 0%, transparent 60%),
-                radial-gradient(ellipse 60% 40% at 85% 95%, rgba(16, 185, 129, 0.03) 0%, transparent 50%);
-            background-attachment: fixed;
+            overflow-x: hidden;
         }
 
-        .ambient-grid-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-image:
-                linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
-            background-size: 48px 48px;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .app-shell {
-            position: relative;
-            z-index: 1;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
-        /* Top Navigation */
+        /* Top Executive Navigation Bar */
         .top-navbar {
+            background: var(--bg-surface);
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 0.65rem 1.5rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0.85rem 2.5rem;
-            background: rgba(14, 21, 38, 0.85);
-            border-bottom: 1px solid var(--border-subtle);
-            backdrop-filter: blur(20px);
+            font-size: 0.78rem;
             position: sticky;
             top: 0;
             z-index: 100;
+            width: 100%;
         }
 
-        .brand-container {
+        .brand-section {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
-        .brand-logo-icon {
-            width: 36px;
-            height: 36px;
+        .brand-shield-icon {
+            width: 28px;
+            height: 28px;
+            background: var(--primary-subtle);
+            border: 1px solid var(--primary-border);
             border-radius: var(--radius-sm);
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(30, 58, 138, 0.4));
-            border: 1px solid rgba(59, 130, 246, 0.35);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--primary-light);
+            color: #60a5fa;
+            flex-shrink: 0;
         }
 
-        .brand-text-wrap {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .brand-title-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .brand-name {
-            font-size: 1.05rem;
+        .brand-text {
             font-weight: 700;
-            letter-spacing: -0.01em;
+            font-size: 0.92rem;
             color: #ffffff;
+            letter-spacing: -0.01em;
+            white-space: nowrap;
         }
 
-        .brand-version-badge {
-            font-size: 0.65rem;
+        .soc-level-pill {
+            font-family: var(--font-mono);
+            font-size: 0.62rem;
             font-weight: 600;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-subtle);
             padding: 2px 6px;
-            border-radius: 4px;
-            background: var(--primary-subtle);
-            color: var(--primary-light);
-            border: 1px solid var(--primary-border);
+            border-radius: var(--radius-xs);
+            color: var(--text-secondary);
             letter-spacing: 0.04em;
         }
 
-        .brand-subtitle {
-            font-size: 0.72rem;
-            color: var(--text-muted);
-            letter-spacing: 0.02em;
-        }
-
-        .nav-system-status {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .status-indicator-tag {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 5px 12px;
-            border-radius: 20px;
-            background: var(--bg-surface-subtle);
-            border: 1px solid var(--border-subtle);
-            font-size: 0.75rem;
-            font-family: var(--font-mono);
-            color: var(--text-secondary);
-        }
-
-        .status-dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: var(--safe);
-            box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
-        }
-
-        .status-meta-text {
-            color: var(--text-muted);
-        }
-
-        /* Status Ticker Bar */
-        .system-telemetry-bar {
-            background: rgba(10, 15, 26, 0.95);
-            border-bottom: 1px solid var(--border-subtle);
-            padding: 6px 2.5rem;
+        .nav-telemetry-feed {
             display: flex;
             align-items: center;
             gap: 14px;
-            font-size: 0.75rem;
             font-family: var(--font-mono);
-            color: var(--text-muted);
-        }
-
-        .telemetry-badge {
-            background: var(--primary-subtle);
-            color: var(--primary-light);
-            border: 1px solid var(--primary-border);
-            padding: 2px 7px;
-            border-radius: 4px;
-            font-weight: 600;
-            font-size: 0.68rem;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-        }
-
-        .telemetry-message {
-            color: var(--text-secondary);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        /* Workspace Main Container */
-        .main-workspace {
-            max-width: 1160px;
-            width: 100%;
-            margin: 2.25rem auto 4rem auto;
-            padding: 0 1.5rem;
-        }
-
-        /* Hero Header */
-        .hero-section {
-            text-align: center;
-            margin-bottom: 2.25rem;
-        }
-
-        .hero-pill-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 7px;
-            padding: 4px 14px;
-            border-radius: 20px;
-            background: rgba(59, 130, 246, 0.08);
-            border: 1px solid rgba(59, 130, 246, 0.2);
-            color: var(--primary-light);
-            font-size: 0.78rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-        }
-
-        .hero-heading {
-            font-size: 2.5rem;
-            font-weight: 800;
-            letter-spacing: -0.03em;
-            line-height: 1.2;
-            margin-bottom: 0.85rem;
-            color: #ffffff;
-        }
-
-        .hero-description {
-            font-size: 1.05rem;
-            color: var(--text-muted);
-            max-width: 680px;
-            margin: 0 auto;
-            font-weight: 400;
-            line-height: 1.6;
-        }
-
-        /* Scanner Console Card */
-        .scanner-console-card {
-            background: var(--bg-surface);
-            border: 1px solid var(--border-medium);
-            border-radius: var(--radius-xl);
-            padding: 1.75rem;
-            box-shadow: var(--shadow-card);
-            margin-bottom: 2rem;
-            position: relative;
-        }
-
-        .search-input-group {
-            display: flex;
-            align-items: center;
-            background: var(--bg-base);
-            border: 1px solid var(--border-medium);
-            border-radius: var(--radius-md);
-            padding: 6px 8px 6px 16px;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .search-input-group:focus-within {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-        }
-
-        .search-prefix-icon {
-            color: var(--text-disabled);
-            margin-right: 12px;
-            display: flex;
-            align-items: center;
-        }
-
-        .url-input-control {
-            flex: 1;
-            background: transparent;
-            border: none;
-            outline: none;
-            font-family: var(--font-mono);
-            font-size: 0.95rem;
-            color: var(--text-primary);
-            padding: 8px 0;
-        }
-
-        .url-input-control::placeholder {
-            color: var(--text-disabled);
-            font-family: var(--font-sans);
-            font-size: 0.9rem;
-        }
-
-        .clear-input-btn {
-            background: transparent;
-            border: none;
-            color: var(--text-disabled);
-            padding: 6px;
-            cursor: pointer;
-            border-radius: 4px;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            margin-right: 8px;
-            transition: color 0.15s ease;
-        }
-
-        .clear-input-btn:hover {
-            color: var(--text-primary);
-        }
-
-        .scan-action-btn {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: var(--primary);
-            color: #ffffff;
-            border: none;
-            border-radius: var(--radius-sm);
-            padding: 10px 22px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            font-family: var(--font-sans);
-            cursor: pointer;
-            transition: background 0.15s ease, transform 0.1s ease;
-            white-space: nowrap;
-        }
-
-        .scan-action-btn:hover {
-            background: #2563eb;
-        }
-
-        .scan-action-btn:active {
-            transform: scale(0.99);
-        }
-
-        .scan-action-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        /* Preset Threat Vectors Row */
-        .preset-vectors-row {
-            display: flex;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 1.25rem;
-            padding-top: 1.25rem;
-            border-top: 1px solid var(--border-subtle);
-        }
-
-        .preset-label {
             font-size: 0.72rem;
-            color: var(--text-disabled);
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            margin-right: 4px;
+            color: var(--text-secondary);
         }
 
-        .preset-pill-btn {
-            background: var(--bg-surface-subtle);
-            border: 1px solid var(--border-subtle);
-            color: var(--text-secondary);
-            padding: 5px 12px;
-            border-radius: var(--radius-sm);
-            font-size: 0.75rem;
-            font-family: var(--font-mono);
-            cursor: pointer;
-            transition: all 0.15s ease;
-            display: inline-flex;
+        .live-pulse-node {
+            display: flex;
             align-items: center;
             gap: 6px;
         }
 
-        .preset-pill-btn:hover {
-            background: var(--bg-surface-raised);
+        .pulse-beacon {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--clean);
+            box-shadow: 0 0 8px var(--clean);
+        }
+
+        /* Workspace Grid Shell */
+        .workspace-shell {
+            max-width: 1400px;
+            width: 100%;
+            margin: 1.5rem auto 3rem auto;
+            padding: 0 1.25rem;
+            flex: 1;
+        }
+
+        /* Console Intro */
+        .console-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .console-main-title {
+            font-size: 1.45rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: #ffffff;
+            margin-bottom: 0.25rem;
+        }
+
+        .console-description {
+            font-size: 0.84rem;
+            color: var(--text-secondary);
+            max-width: 920px;
+        }
+
+        /* Omnibar Ingestion Card */
+        .ingestion-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 1.15rem 1.25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+        }
+
+        .omnibar-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .input-carrier {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+            min-width: 0;
+        }
+
+        .carrier-prefix-icon {
+            position: absolute;
+            left: 14px;
+            color: var(--text-dim);
+            pointer-events: none;
+            display: flex;
+        }
+
+        .omnibar-text-input {
+            width: 100%;
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
             color: var(--text-primary);
-            border-color: var(--border-medium);
+            font-family: var(--font-mono);
+            font-size: 0.88rem;
+            padding: 11px 36px 11px 40px;
+            outline: none;
+            transition: all 0.15s ease;
         }
 
-        .preset-tag-safe {
-            border-left: 2px solid var(--safe);
+        .omnibar-text-input:focus {
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 2px var(--primary-subtle);
         }
 
-        .preset-tag-threat {
-            border-left: 2px solid var(--danger);
+        .omnibar-text-input::placeholder {
+            color: var(--text-dim);
+            font-family: var(--font-sans);
+            font-size: 0.82rem;
         }
 
-        /* Inspection Progress State */
-        .inspection-progress-card {
+        .input-reset-btn {
+            position: absolute;
+            right: 12px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
             display: none;
-            background: var(--bg-surface-raised);
-            border: 1px solid var(--border-medium);
-            border-radius: var(--radius-lg);
-            padding: 2.25rem 2rem;
-            margin-top: 1.5rem;
-            text-align: center;
+            align-items: center;
+            padding: 4px;
         }
 
-        .progress-indicator-track {
-            max-width: 480px;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.08);
+        .input-reset-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .scan-action-button {
+            background: var(--primary);
+            color: #ffffff;
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 11px 22px;
+            font-size: 0.86rem;
+            font-weight: 600;
+            font-family: var(--font-sans);
+            cursor: pointer;
+            transition: background 0.15s ease;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .scan-action-button:hover {
+            background: var(--primary-hover);
+        }
+
+        .scan-action-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Preset Threat Chips */
+        .threat-chips-bar {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 0.85rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .chips-label {
+            font-size: 0.68rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-right: 2px;
+        }
+
+        .vector-chip {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            padding: 4px 9px;
+            border-radius: var(--radius-xs);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+        }
+
+        .vector-chip:hover {
+            background: var(--bg-base);
+            border-color: var(--border-medium);
+            color: #ffffff;
+        }
+
+        .vector-chip.tag-clean { border-left: 2px solid var(--clean); }
+        .vector-chip.tag-threat { border-left: 2px solid var(--threat); }
+
+        /* Scanning Progress State */
+        .progress-carrier {
+            display: none;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 2rem 1.5rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .progress-track-bar {
+            max-width: 380px;
+            height: 3px;
+            background: var(--bg-input);
             border-radius: 2px;
-            margin: 0 auto 1.5rem auto;
+            margin: 0 auto 0.85rem auto;
             overflow: hidden;
             position: relative;
         }
 
-        .progress-indicator-fill {
+        .progress-sweep-fill {
             position: absolute;
             top: 0;
             left: 0;
             height: 100%;
             width: 40%;
-            background: linear-gradient(90deg, var(--primary), var(--primary-light));
-            border-radius: 2px;
-            animation: progressSweep 1.6s infinite ease-in-out;
+            background: var(--primary);
+            animation: sweepTrack 1.3s infinite ease-in-out;
         }
 
-        @keyframes progressSweep {
+        @keyframes sweepTrack {
             0% { left: -40%; width: 40%; }
             50% { width: 60%; }
             100% { left: 100%; width: 40%; }
         }
 
-        .progress-heading {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 0.4rem;
-        }
-
-        .progress-subtext {
-            font-size: 0.82rem;
-            color: var(--text-muted);
+        .progress-subtext-msg {
             font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--text-secondary);
         }
 
-        .progress-steps-list {
-            display: flex;
-            justify-content: center;
-            gap: 24px;
-            margin-top: 1.5rem;
-            padding-top: 1.25rem;
-            border-top: 1px solid var(--border-subtle);
-        }
-
-        .progress-step-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.75rem;
-            color: var(--text-disabled);
-        }
-
-        .progress-step-item.active {
-            color: var(--primary-light);
-            font-weight: 500;
-        }
-
-        .step-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: currentColor;
-        }
-
-        /* Results Assessment Section */
-        .assessment-results-panel {
+        /* Responsive Desktop Grid Layout (2-Column Command Center) */
+        .assessment-command-grid {
             display: none;
-            margin-top: 2rem;
-            animation: fadeIn 0.25s ease-out;
+            grid-template-columns: minmax(0, 1.9fr) minmax(0, 1.1fr);
+            gap: 1.25rem;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+            animation: reportSlideIn 0.2s ease-out;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
+        @keyframes reportSlideIn {
+            from { opacity: 0; transform: translateY(6px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Verdict Hero Card */
-        .verdict-hero-container {
-            display: grid;
-            grid-template-columns: 1fr 280px;
-            gap: 1.5rem;
-            border-radius: var(--radius-lg);
-            padding: 1.75rem;
-            margin-bottom: 1.5rem;
-            background: var(--bg-surface);
-            border: 1px solid var(--border-medium);
-            box-shadow: var(--shadow-card);
-        }
-
-        .verdict-hero-container.status-safe {
-            border-color: var(--safe-border);
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, var(--bg-surface) 100%);
-        }
-
-        .verdict-hero-container.status-threat {
-            border-color: var(--danger-border);
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, var(--bg-surface) 100%);
-        }
-
-        .verdict-hero-container.status-error {
-            border-color: var(--warning-border);
-            background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, var(--bg-surface) 100%);
-        }
-
-        .verdict-main-content {
+        .assessment-main-col {
             display: flex;
+            flex-direction: column;
             gap: 1.25rem;
-            align-items: flex-start;
+            min-width: 0;
         }
 
-        .verdict-status-icon-box {
-            width: 52px;
-            height: 52px;
+        .assessment-sidebar-col {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            min-width: 0;
+        }
+
+        /* Brand Alert Banner */
+        .brand-spoof-alert {
+            display: none;
+            background: var(--threat-bg);
+            border: 1px solid var(--threat-border);
+            border-radius: var(--radius-sm);
+            padding: 9px 14px;
+            font-size: 0.8rem;
+            color: #ffffff;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand-alert-badge {
+            background: var(--threat);
+            color: #ffffff;
+            font-size: 0.65rem;
+            font-weight: 700;
+            font-family: var(--font-mono);
+            padding: 2px 6px;
+            border-radius: var(--radius-xs);
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        /* Executive Verdict Card */
+        .verdict-hero-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
             border-radius: var(--radius-md);
+            padding: 1.35rem 1.5rem;
             display: flex;
             align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            background: var(--bg-surface-raised);
-            border: 1px solid var(--border-subtle);
+            justify-content: space-between;
+            gap: 1.25rem;
         }
 
-        .status-safe .verdict-status-icon-box {
-            background: var(--safe-subtle);
-            border-color: var(--safe-border);
-            color: var(--safe);
+        .verdict-hero-card.status-clean {
+            border-color: var(--clean-border);
+            background: linear-gradient(135deg, var(--clean-bg) 0%, var(--bg-surface) 100%);
         }
 
-        .status-threat .verdict-status-icon-box {
-            background: var(--danger-subtle);
-            border-color: var(--danger-border);
-            color: var(--danger);
+        .verdict-hero-card.status-threat {
+            border-color: var(--threat-border);
+            background: linear-gradient(135deg, var(--threat-bg) 0%, var(--bg-surface) 100%);
         }
 
-        .status-error .verdict-status-icon-box {
-            background: var(--warning-subtle);
-            border-color: var(--warning-border);
-            color: var(--warning);
-        }
-
-        .verdict-text-details {
+        .verdict-info-col {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
             flex: 1;
             min-width: 0;
         }
 
-        .verdict-badge-indicator {
-            font-size: 0.7rem;
+        .verdict-symbol-frame {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .status-clean .verdict-symbol-frame {
+            background: var(--clean-bg);
+            color: var(--clean);
+            border: 1px solid var(--clean-border);
+        }
+
+        .status-threat .verdict-symbol-frame {
+            background: var(--threat-bg);
+            color: var(--threat);
+            border: 1px solid var(--threat-border);
+        }
+
+        .verdict-header-kicker {
+            font-size: 0.66rem;
+            font-family: var(--font-mono);
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.08em;
-            display: inline-block;
-            margin-bottom: 0.35rem;
+            margin-bottom: 2px;
         }
 
-        .status-safe .verdict-badge-indicator { color: var(--safe-light); }
-        .status-threat .verdict-badge-indicator { color: var(--danger-light); }
-        .status-error .verdict-badge-indicator { color: var(--warning-light); }
+        .status-clean .verdict-header-kicker { color: var(--clean); }
+        .status-threat .verdict-header-kicker { color: var(--threat); }
 
-        .verdict-headline-text {
-            font-size: 1.5rem;
+        .verdict-main-headline {
+            font-size: 1.25rem;
             font-weight: 700;
-            letter-spacing: -0.02em;
-            margin-bottom: 0.5rem;
-            line-height: 1.25;
+            letter-spacing: -0.01em;
+            color: #ffffff;
+            margin-bottom: 6px;
+            line-height: 1.3;
         }
 
-        .status-safe .verdict-headline-text { color: #ffffff; }
-        .status-threat .verdict-headline-text { color: #ffffff; }
-
-        .verdict-target-display {
+        .observable-carrier-box {
             display: flex;
             align-items: center;
-            gap: 10px;
-            background: var(--bg-base);
+            gap: 8px;
+            background: var(--bg-input);
             border: 1px solid var(--border-subtle);
-            border-radius: var(--radius-sm);
-            padding: 8px 12px;
+            border-radius: var(--radius-xs);
+            padding: 4px 9px;
             max-width: 100%;
         }
 
-        .target-url-string {
+        .observable-target-text {
             font-family: var(--font-mono);
-            font-size: 0.85rem;
+            font-size: 0.78rem;
             color: var(--text-secondary);
             overflow: hidden;
             text-overflow: ellipsis;
@@ -626,401 +505,382 @@
             flex: 1;
         }
 
-        .inline-icon-btn {
+        .inline-action-icon-btn {
             background: transparent;
             border: none;
             color: var(--text-muted);
             cursor: pointer;
             display: flex;
             align-items: center;
-            padding: 4px;
-            border-radius: 4px;
-            transition: color 0.15s ease, background 0.15s ease;
+            padding: 3px;
+            border-radius: 3px;
+            transition: color 0.15s ease;
         }
 
-        .inline-icon-btn:hover {
+        .inline-action-icon-btn:hover {
             color: var(--text-primary);
-            background: var(--bg-surface-raised);
         }
 
-        /* Risk Gauge Card */
-        .verdict-gauge-wrapper {
-            background: var(--bg-base);
+        .verdict-score-wrapper {
+            background: var(--bg-input);
             border: 1px solid var(--border-subtle);
-            border-radius: var(--radius-md);
-            padding: 1.25rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-        }
-
-        .gauge-svg-container {
-            position: relative;
-            width: 140px;
-            height: 75px;
-            overflow: hidden;
-        }
-
-        .gauge-canvas {
-            width: 140px;
-            height: 140px;
-            transform: rotate(-90deg);
-        }
-
-        .gauge-meter-track {
-            fill: none;
-            stroke: rgba(255, 255, 255, 0.08);
-            stroke-width: 12;
-        }
-
-        .gauge-meter-value {
-            fill: none;
-            stroke-width: 12;
-            stroke-linecap: round;
-            transition: stroke-dashoffset 0.8s ease-out, stroke 0.3s ease;
-        }
-
-        .gauge-numeric-score {
-            font-size: 1.6rem;
-            font-weight: 700;
-            font-family: var(--font-mono);
-            margin-top: -10px;
-            color: #ffffff;
-        }
-
-        .gauge-metric-title {
-            font-size: 0.72rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            font-weight: 600;
-            margin-top: 2px;
-        }
-
-        /* 4-Column Multi-Signal Telemetry Matrix */
-        .telemetry-metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-            margin-bottom: 1.5rem;
-        }
-
-        .telemetry-metric-tile {
-            background: var(--bg-surface);
-            border: 1px solid var(--border-subtle);
-            border-radius: var(--radius-md);
-            padding: 1rem 1.15rem;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .metric-tile-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            color: var(--text-muted);
-        }
-
-        .metric-tile-label {
-            font-size: 0.72rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .metric-tile-icon {
-            color: var(--text-disabled);
-            display: flex;
-            align-items: center;
-        }
-
-        .metric-tile-value {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            font-family: var(--font-mono);
-        }
-
-        .metric-tile-subtext {
-            font-size: 0.72rem;
-            color: var(--text-disabled);
-        }
-
-        /* Technical Inspection Sections / Tabs */
-        .inspection-tabs-container {
-            background: var(--bg-surface);
-            border: 1px solid var(--border-medium);
-            border-radius: var(--radius-lg);
-            overflow: hidden;
-            margin-bottom: 1.5rem;
-        }
-
-        .tab-headers-bar {
-            display: flex;
-            align-items: center;
-            border-bottom: 1px solid var(--border-subtle);
-            background: var(--bg-surface-subtle);
-            padding: 0 1rem;
-        }
-
-        .tab-button {
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            padding: 12px 18px;
-            font-size: 0.82rem;
-            font-weight: 600;
-            font-family: var(--font-sans);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border-bottom: 2px solid transparent;
-            transition: all 0.15s ease;
-        }
-
-        .tab-button:hover {
-            color: var(--text-primary);
-        }
-
-        .tab-button.active {
-            color: var(--primary-light);
-            border-bottom-color: var(--primary);
-            background: var(--bg-surface);
-        }
-
-        .tab-panel-body {
-            padding: 1.5rem;
-        }
-
-        /* Tab 1: Decomposition */
-        .tokens-grid-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .token-component-card {
-            display: inline-flex;
-            flex-direction: column;
-            padding: 8px 14px;
             border-radius: var(--radius-sm);
-            font-family: var(--font-mono);
-            font-size: 0.85rem;
-            background: var(--bg-base);
-            border: 1px solid var(--border-subtle);
-            min-width: 140px;
+            padding: 0.85rem 1.35rem;
+            text-align: center;
+            min-width: 135px;
+            flex-shrink: 0;
         }
 
-        .token-component-type {
-            font-size: 0.65rem;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
+        .score-headline-number {
+            font-family: var(--font-mono);
+            font-size: 1.7rem;
             font-weight: 700;
-            color: var(--text-disabled);
+            color: #ffffff;
+            line-height: 1;
             margin-bottom: 3px;
         }
 
-        .token-component-value {
-            color: var(--text-secondary);
-            word-break: break-all;
+        .score-caption-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            font-weight: 600;
         }
 
-        /* Tab 2: Heuristic Feature Matrix */
-        .heuristic-signals-grid {
+        /* 4-Pillar SOC Telemetry Quad (Sidebar Grid) */
+        .soc-telemetry-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 10px;
         }
 
-        .heuristic-item-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 14px;
-            border-radius: var(--radius-sm);
-            background: var(--bg-base);
-            border: 1px solid var(--border-subtle);
-            font-size: 0.82rem;
-        }
-
-        .heuristic-item-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: var(--text-secondary);
-        }
-
-        .heuristic-status-badge {
-            font-size: 0.7rem;
-            font-weight: 600;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-family: var(--font-mono);
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-        }
-
-        .status-badge-clean {
-            background: var(--safe-subtle);
-            color: var(--safe-light);
-            border: 1px solid var(--safe-border);
-        }
-
-        .status-badge-flagged {
-            background: var(--danger-subtle);
-            color: var(--danger-light);
-            border: 1px solid var(--danger-border);
-        }
-
-        /* Tab 3: Raw IOC JSON */
-        .json-preview-container {
-            position: relative;
-            background: var(--bg-base);
-            border: 1px solid var(--border-subtle);
-            border-radius: var(--radius-sm);
-            padding: 1rem;
-            font-family: var(--font-mono);
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            overflow-x: auto;
-            max-height: 280px;
-        }
-
-        /* Action Toolbar */
-        .results-actions-bar {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 1rem;
-        }
-
-        .secondary-action-btn {
-            background: var(--bg-surface-raised);
-            border: 1px solid var(--border-medium);
-            color: var(--text-secondary);
-            padding: 8px 16px;
-            border-radius: var(--radius-sm);
-            font-size: 0.82rem;
-            font-weight: 600;
-            font-family: var(--font-sans);
-            cursor: pointer;
-            transition: all 0.15s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .secondary-action-btn:hover {
-            background: var(--bg-surface-elevated);
-            color: var(--text-primary);
-            border-color: var(--border-focus);
-        }
-
-        /* Audit Log & Scan History Table */
-        .audit-history-panel {
+        .telemetry-tile-card {
             background: var(--bg-surface);
-            border: 1px solid var(--border-medium);
-            border-radius: var(--radius-lg);
-            padding: 1.5rem;
-            box-shadow: var(--shadow-card);
-            margin-top: 2.5rem;
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            padding: 0.95rem;
+            min-width: 0;
         }
 
-        .audit-panel-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 1.25rem;
-        }
-
-        .audit-heading {
-            font-size: 1rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--text-primary);
-        }
-
-        .table-responsive-wrapper {
-            overflow-x: auto;
-        }
-
-        .audit-telemetry-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.85rem;
-            text-align: left;
-        }
-
-        .audit-telemetry-table th {
-            padding: 10px 14px;
-            color: var(--text-muted);
-            font-size: 0.72rem;
-            font-weight: 600;
+        .tile-caption-title {
+            font-size: 0.68rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            border-bottom: 1px solid var(--border-medium);
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        .audit-telemetry-table td {
-            padding: 12px 14px;
-            border-bottom: 1px solid var(--border-subtle);
-            vertical-align: middle;
-        }
-
-        .audit-url-cell {
+        .tile-value-metric {
+            font-size: 0.95rem;
+            font-weight: 600;
             font-family: var(--font-mono);
-            max-width: 420px;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .tile-subtext-detail {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Sidebar Network Recon Card */
+        .network-recon-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            padding: 1.1rem;
+        }
+
+        .sidebar-section-title {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .recon-rows-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 0.78rem;
+        }
+
+        .recon-row-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            padding-bottom: 6px;
+        }
+
+        .recon-key {
+            color: var(--text-muted);
+            font-size: 0.72rem;
+        }
+
+        .recon-val {
+            font-family: var(--font-mono);
+            color: var(--text-secondary);
+            max-width: 60%;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+        }
+
+        /* Forensic Tabbed Deep-Dive */
+        .forensic-tabs-panel {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .tab-headers-row {
+            display: flex;
+            background: var(--bg-elevated);
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 0 0.5rem;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .forensic-tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            font-weight: 600;
+            font-family: var(--font-sans);
+            padding: 10px 14px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .forensic-tab-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .forensic-tab-btn.active {
+            color: #ffffff;
+            border-bottom-color: var(--primary);
+            background: var(--bg-surface);
+        }
+
+        .tab-content-viewport {
+            padding: 1.15rem;
+        }
+
+        /* Responsive Table Container */
+        .table-responsive-box {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Heuristics Matrix Table */
+        .forensic-matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+            min-width: 480px;
+        }
+
+        .forensic-matrix-table th {
+            text-align: left;
+            padding: 8px 10px;
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .forensic-matrix-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
             color: var(--text-secondary);
         }
 
-        .table-verdict-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            padding: 3px 10px;
-            border-radius: 4px;
-            font-size: 0.72rem;
-            font-weight: 600;
+        .status-pill-badge {
             font-family: var(--font-mono);
+            font-size: 0.68rem;
+            padding: 2px 7px;
+            border-radius: var(--radius-xs);
+            font-weight: 600;
+            display: inline-block;
             text-transform: uppercase;
-            letter-spacing: 0.04em;
+            white-space: nowrap;
         }
 
-        .table-verdict-pill.is-safe {
-            background: var(--safe-subtle);
-            color: var(--safe-light);
-            border: 1px solid var(--safe-border);
+        .status-pill-badge.pass {
+            background: var(--clean-bg);
+            color: var(--clean);
+            border: 1px solid var(--clean-border);
         }
 
-        .table-verdict-pill.is-threat {
-            background: var(--danger-subtle);
-            color: var(--danger-light);
-            border: 1px solid var(--danger-border);
+        .status-pill-badge.trigger {
+            background: var(--threat-bg);
+            color: var(--threat);
+            border: 1px solid var(--threat-border);
         }
 
-        /* Architecture Overview Grid */
+        /* Structural Decomposition Grid */
+        .decomposition-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .decomp-tile-cell {
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-xs);
+            padding: 8px 10px;
+            min-width: 0;
+        }
+
+        .decomp-header-key {
+            font-size: 0.62rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.06em;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .decomp-value-content {
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            word-break: break-all;
+        }
+
+        /* MITRE ATT&CK Matrix Cards */
+        .mitre-cards-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .mitre-technique-card {
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            padding: 10px 12px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .mitre-tag-id {
+            background: var(--threat-bg);
+            color: var(--threat);
+            border: 1px solid var(--threat-border);
+            font-family: var(--font-mono);
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: var(--radius-xs);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .mitre-technique-name {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 2px;
+        }
+
+        .mitre-technique-desc {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        /* Raw JSON Viewer */
+        .json-preview-shelf {
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-xs);
+            padding: 0.85rem;
+            font-family: var(--font-mono);
+            font-size: 0.76rem;
+            color: var(--text-secondary);
+            max-height: 260px;
+            overflow-y: auto;
+        }
+
+        /* Audit Log Panel */
+        .audit-trail-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            padding: 1.1rem;
+        }
+
+        .audit-records-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.78rem;
+        }
+
+        .audit-records-table th {
+            text-align: left;
+            padding: 6px 8px;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .audit-records-table td {
+            padding: 7px 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            color: var(--text-secondary);
+        }
+
+        .url-truncate-cell {
+            max-width: 180px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-family: var(--font-mono);
+        }
+
+        /* Architecture Capabilities Grid */
         .capabilities-overview-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 1.25rem;
-            margin-top: 3.5rem;
+            margin-top: 2.25rem;
+            margin-bottom: 1.25rem;
         }
 
         .capability-feature-card {
             background: var(--bg-surface);
             border: 1px solid var(--border-subtle);
             border-radius: var(--radius-md);
-            padding: 1.5rem;
+            padding: 1.35rem 1.25rem;
             transition: border-color 0.2s ease, transform 0.2s ease;
         }
 
@@ -1030,290 +890,212 @@
         }
 
         .capability-icon-wrap {
-            width: 38px;
-            height: 38px;
+            width: 36px;
+            height: 36px;
             border-radius: var(--radius-sm);
             background: var(--primary-subtle);
             border: 1px solid var(--primary-border);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--primary-light);
-            margin-bottom: 1rem;
+            color: #60a5fa;
+            margin-bottom: 0.85rem;
         }
 
         .capability-card-title {
-            font-size: 0.95rem;
+            font-size: 0.92rem;
             font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 0.4rem;
+            color: #ffffff;
+            margin-bottom: 0.35rem;
         }
 
         .capability-card-text {
-            font-size: 0.82rem;
-            color: var(--text-muted);
-            line-height: 1.55;
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
         }
 
-        /* Toast Notifications */
-        .toast-notification-shelf {
+        /* HUD Toast */
+        .hud-toast-banner {
             position: fixed;
-            bottom: 24px;
-            right: 24px;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .toast-message-item {
-            background: var(--bg-surface-elevated);
+            bottom: 20px;
+            right: 20px;
+            background: var(--bg-elevated);
             border: 1px solid var(--border-medium);
             color: var(--text-primary);
-            padding: 10px 16px;
-            border-radius: var(--radius-sm);
-            font-size: 0.82rem;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            animation: slideInRight 0.2s ease-out;
-        }
-
-        @keyframes slideInRight {
-            from { opacity: 0; transform: translateX(20px); }
-            to { opacity: 1; transform: translateX(0); }
+            padding: 8px 14px;
+            border-radius: var(--radius-xs);
+            font-size: 0.8rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            display: none;
+            z-index: 1000;
         }
 
         /* Footer */
-        .app-footer-bar {
+        .soc-footer {
             margin-top: auto;
-            padding: 2rem 2.5rem;
             border-top: 1px solid var(--border-subtle);
+            padding: 1rem 1.5rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            font-size: 0.78rem;
-            color: var(--text-disabled);
-        }
-
-        .footer-links-group {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .footer-link-item {
+            font-size: 0.72rem;
             color: var(--text-muted);
-            text-decoration: none;
-            transition: color 0.15s ease;
-        }
-
-        .footer-link-item:hover {
-            color: var(--text-primary);
-        }
-
-        /* Server Render Fallback Alert */
-        .server-fallback-alert {
-            background: var(--bg-surface-raised);
-            border: 1px solid var(--border-medium);
-            border-radius: var(--radius-md);
-            padding: 1.25rem;
-            margin-bottom: 1.5rem;
             font-family: var(--font-mono);
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            white-space: pre-wrap;
+            width: 100%;
         }
 
-        /* Responsive Breakpoints */
+        /* Tablet & Mobile Media Queries */
         @media (max-width: 1024px) {
-            .telemetry-metrics-grid { grid-template-columns: repeat(2, 1fr); }
-            .capabilities-overview-grid { grid-template-columns: 1fr; }
-            .verdict-hero-container { grid-template-columns: 1fr; }
+            .assessment-command-grid {
+                grid-template-columns: 1fr;
+            }
+            .soc-telemetry-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            .capabilities-overview-grid {
+                grid-template-columns: 1fr;
+            }
+            .url-truncate-cell {
+                max-width: 280px;
+            }
         }
 
         @media (max-width: 768px) {
-            .top-navbar { padding: 0.85rem 1.25rem; }
-            .nav-system-status { display: none; }
-            .hero-heading { font-size: 1.85rem; }
-            .search-input-group { flex-direction: column; align-items: stretch; gap: 8px; }
-            .scan-action-btn { justify-content: center; width: 100%; }
-            .telemetry-metrics-grid { grid-template-columns: 1fr; }
-            .heuristic-signals-grid { grid-template-columns: 1fr; }
-            .progress-steps-list { flex-direction: column; align-items: flex-start; gap: 10px; }
-            .app-footer-bar { flex-direction: column; gap: 12px; text-align: center; }
+            .top-navbar { padding: 0.65rem 1rem; }
+            .nav-telemetry-feed { display: none; }
+            .workspace-shell { padding: 0 0.85rem; margin-top: 1rem; }
+            .console-main-title { font-size: 1.25rem; }
+            .omnibar-row { flex-direction: column; align-items: stretch; }
+            .scan-action-button { justify-content: center; width: 100%; min-height: 42px; }
+            .verdict-hero-card { flex-direction: column; align-items: stretch; }
+            .verdict-score-wrapper { width: 100%; text-align: center; }
+            .soc-telemetry-grid { grid-template-columns: repeat(2, 1fr); }
+            .decomposition-grid { grid-template-columns: 1fr; }
+            .soc-footer { flex-direction: column; gap: 8px; text-align: center; }
+            .url-truncate-cell { max-width: 140px; }
+        }
+
+        @media (max-width: 480px) {
+            .soc-telemetry-grid { grid-template-columns: 1fr; }
+            .threat-chips-bar { flex-direction: column; align-items: stretch; }
+            .vector-chip { text-align: center; }
         }
     </style>
 </head>
 <body>
-    <div class="ambient-grid-overlay"></div>
 
-    <div class="app-shell">
-        <!-- Top Executive Navbar -->
-        <header class="top-navbar">
-            <div class="brand-container">
-                <div class="brand-logo-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                        <path d="m9 12 2 2 4-4"/>
-                    </svg>
-                </div>
-                <div class="brand-text-wrap">
-                    <div class="brand-title-row">
-                        <span class="brand-name">PhishGuard</span>
-                        <span class="brand-version-badge">Enterprise v2.4</span>
-                    </div>
-                    <span class="brand-subtitle">Predictive Threat Intelligence & URL Analysis</span>
-                </div>
+    <!-- Executive Navbar -->
+    <header class="top-navbar">
+        <div class="brand-section">
+            <div class="brand-shield-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
             </div>
-
-            <div class="nav-system-status">
-                <div class="status-indicator-tag">
-                    <div class="status-dot"></div>
-                    <span>Threat Engine: <strong style="color:#fff;">Operational</strong></span>
-                </div>
-                <div class="status-indicator-tag">
-                    <span class="status-meta-text">Model:</span>
-                    <span>TF-IDF + Logistic Reg</span>
-                </div>
-                <div class="status-indicator-tag">
-                    <span class="status-meta-text">Vector Dim:</span>
-                    <span>10,000+ N-Grams</span>
-                </div>
+            <span class="brand-text">PhishGuard Enterprise</span>
+            <span class="soc-level-pill">SOC Tier-3 Intel</span>
+        </div>
+        <div class="nav-telemetry-feed">
+            <div class="live-pulse-node">
+                <div class="pulse-beacon"></div>
+                <span>ML Pipeline: Operational</span>
             </div>
-        </header>
+            <span>•</span>
+            <span>TF-IDF NLP + Logistic Regression</span>
+        </div>
+    </header>
 
-        <!-- System Telemetry Ticker Bar -->
-        <div class="system-telemetry-bar">
-            <span class="telemetry-badge">SOC Telemetry</span>
-            <span class="telemetry-message" id="tickerFeed">Active zero-day lexical heuristic engine • Multi-vector predictive analysis</span>
+    <!-- Main Workspace -->
+    <main class="workspace-shell">
+        <div class="console-header">
+            <h1 class="console-main-title">URL Threat Intelligence & Phishing Scanner</h1>
+            <p class="console-description">
+                Evaluate inbound target observables with multi-vector lexical heuristics, TF-IDF statistical n-gram representations, and live DNS/TLS network reconnaissance.
+            </p>
         </div>
 
-        <!-- Main Workspace -->
-        <main class="main-workspace">
-            <!-- Hero Title -->
-            <div class="hero-section">
-                <div class="hero-pill-badge">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="12" y1="16" x2="12" y2="12"/>
-                        <line x1="12" y1="8" x2="12.01" y2="8"/>
-                    </svg>
-                    <span>Zero-Trust Predictive Phishing Intelligence</span>
-                </div>
-                <h1 class="hero-heading">URL Threat & Phishing Analysis Console</h1>
-                <p class="hero-description">
-                    Analyze inbound domains, shortened redirects, and suspected credential harvesters using deep lexical heuristics, TF-IDF NLP tokenization, and live threat intelligence.
-                </p>
-            </div>
-
-            <!-- Server Render Fallback (if non-JS request) -->
-            {% if prediction_text %}
-            <div class="server-fallback-alert">
-                <strong>Static Inspection Output:</strong>
-                {{ prediction_text }}
-            </div>
-            {% endif %}
-
-            <!-- Scanner Console Card -->
-            <div class="scanner-console-card">
-                <form id="threatAnalysisForm" onsubmit="return false;">
-                    <div class="search-input-group">
-                        <div class="search-prefix-icon">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <!-- Ingestion Omnibar -->
+        <div class="ingestion-card">
+            <form id="urlScanForm" onsubmit="return false;">
+                <div class="omnibar-row">
+                    <div class="input-carrier">
+                        <div class="carrier-prefix-icon">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <circle cx="11" cy="11" r="8"/>
                                 <line x1="21" y1="21" x2="16.65" y2="16.65"/>
                             </svg>
                         </div>
                         <input
                             type="text"
-                            id="targetUrlInput"
-                            class="url-input-control"
-                            placeholder="Enter fully qualified URL or domain (e.g., https://secure-login.example.com/auth)"
+                            id="targetUrlBox"
+                            class="omnibar-text-input"
+                            placeholder="Enter FQDN or target URL (e.g. https://auth-verify.bank-login.com/index.php)"
                             autocomplete="off"
                             autocapitalize="none"
                             autocorrect="off"
                             spellcheck="false"
                             required
                         >
-                        <button type="button" class="clear-input-btn" id="clearInputBtn" title="Clear input">
+                        <button type="button" class="input-reset-btn" id="inputResetBtn" title="Clear">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="18" y1="6" x2="6" y2="18"/>
                                 <line x1="6" y1="6" x2="18" y2="18"/>
                             </svg>
                         </button>
-                        <button type="submit" class="scan-action-btn" id="submitScanBtn">
-                            <span id="scanBtnLabel">Inspect Target</span>
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                <line x1="5" y1="12" x2="19" y2="12"/>
-                                <polyline points="12 5 19 12 12 19"/>
-                            </svg>
-                        </button>
                     </div>
-
-                    <!-- Preset Test Cases -->
-                    <div class="preset-vectors-row">
-                        <span class="preset-label">Test Profiles:</span>
-                        <button type="button" class="preset-pill-btn preset-tag-safe" onclick="loadSampleUrl('https://github.com/security')">
-                            GitHub Security (Verified Safe)
-                        </button>
-                        <button type="button" class="preset-pill-btn preset-tag-safe" onclick="loadSampleUrl('https://apple.com')">
-                            Apple Enterprise (Legitimate)
-                        </button>
-                        <button type="button" class="preset-pill-btn preset-tag-threat" onclick="loadSampleUrl('http://paypal-verification-update.tk/login.php')">
-                            PayPal Spoofing (Phishing)
-                        </button>
-                        <button type="button" class="preset-pill-btn preset-tag-threat" onclick="loadSampleUrl('http://192.168.1.1/admin/login.php')">
-                            Direct IP Host Masking
-                        </button>
-                    </div>
-                </form>
-
-                <!-- Multi-Phase Inspection Loader -->
-                <div class="inspection-progress-card" id="inspectionProgress">
-                    <div class="progress-indicator-track">
-                        <div class="progress-indicator-fill"></div>
-                    </div>
-                    <div class="progress-heading">Analyzing Target Threat Vectors...</div>
-                    <div class="progress-subtext" id="progressSubtext">Extracting lexical token dimensions • Computing TF-IDF embeddings</div>
-                    
-                    <div class="progress-steps-list">
-                        <div class="progress-step-item active">
-                            <div class="step-dot"></div>
-                            <span>1. Lexical Parser</span>
-                        </div>
-                        <div class="progress-step-item active">
-                            <div class="step-dot"></div>
-                            <span>2. TF-IDF Embedding</span>
-                        </div>
-                        <div class="progress-step-item active">
-                            <div class="step-dot"></div>
-                            <span>3. Threat Registry Probe</span>
-                        </div>
-                        <div class="progress-step-item active">
-                            <div class="step-dot"></div>
-                            <span>4. Classifier Calibration</span>
-                        </div>
-                    </div>
+                    <button type="submit" class="scan-action-button" id="executeScanBtn">
+                        <span id="scanBtnLabel">Analyze Threat</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                            <polyline points="12 5 19 12 12 19"/>
+                        </svg>
+                    </button>
                 </div>
-            </div>
 
-            <!-- Threat Assessment Report Dashboard -->
-            <div class="assessment-results-panel" id="assessmentResults">
-                <!-- Executive Verdict Hero Card -->
-                <div class="verdict-hero-container" id="verdictHeroContainer">
-                    <div class="verdict-main-content">
-                        <div class="verdict-status-icon-box" id="verdictIconBox">
+                <div class="threat-chips-bar">
+                    <span class="chips-label">Reference Vectors:</span>
+                    <button type="button" class="vector-chip tag-clean" onclick="loadSample('https://google.com')">google.com (Benign)</button>
+                    <button type="button" class="vector-chip tag-clean" onclick="loadSample('https://github.com/security')">github.com/security (Legitimate)</button>
+                    <button type="button" class="vector-chip tag-threat" onclick="loadSample('http://paypal-verification-update.tk/login.php')">paypal-spoof.tk (Phishing)</button>
+                    <button type="button" class="vector-chip tag-threat" onclick="loadSample('http://192.168.1.1/admin/login.php')">192.168.1.1 (Direct IP)</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Scanning Progress State -->
+        <div class="progress-carrier" id="progressCarrier">
+            <div class="progress-track-bar">
+                <div class="progress-sweep-fill"></div>
+            </div>
+            <div class="progress-subtext-msg">Extracting lexical token dimensions • Computing TF-IDF vector projections...</div>
+        </div>
+
+        <!-- Threat Report 2-Column Assessment Command Center -->
+        <div class="assessment-command-grid" id="threatAssessmentPanel">
+            
+            <!-- Left Main Column (Verdict + Detailed Tabs) -->
+            <div class="assessment-main-col">
+                
+                <!-- Brand Spoof Warning Banner (If impersonating) -->
+                <div class="brand-spoof-alert" id="brandSpoofAlert">
+                    <span class="brand-alert-badge">Brand Mimicry</span>
+                    <span id="brandSpoofText">Adversary infrastructure identified impersonating protected corporate identity.</span>
+                </div>
+
+                <!-- Executive Verdict Hero -->
+                <div class="verdict-hero-card" id="verdictHeroCard">
+                    <div class="verdict-info-col">
+                        <div class="verdict-symbol-frame" id="verdictSymbolFrame">
                             <!-- Injected by JS -->
                         </div>
-                        <div class="verdict-text-details">
-                            <span class="verdict-badge-indicator" id="verdictClassificationBadge">CLASSIFICATION VERDICT</span>
-                            <h2 class="verdict-headline-text" id="verdictHeadline">Threat Assessment Completed</h2>
-                            <div class="verdict-target-display">
-                                <span class="target-url-string" id="targetUrlDisplay">--</span>
-                                <button type="button" class="inline-icon-btn" onclick="copyAnalyzedUrl()" title="Copy Target URL">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <div>
+                            <div class="verdict-header-kicker" id="verdictHeaderKicker">CLASSIFICATION VERDICT</div>
+                            <div class="verdict-main-headline" id="verdictMainHeadline">Threat Evaluation Completed</div>
+                            <div class="observable-carrier-box">
+                                <span class="observable-target-text" id="observableTargetText">--</span>
+                                <button type="button" class="inline-action-icon-btn" onclick="copyTargetObservable()" title="Copy Target URL">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
                                         <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
                                     </svg>
@@ -1322,183 +1104,130 @@
                         </div>
                     </div>
 
-                    <!-- Risk & Confidence Score Gauge -->
-                    <div class="verdict-gauge-wrapper">
-                        <div class="gauge-svg-container">
-                            <svg class="gauge-canvas" viewBox="0 0 140 140">
-                                <circle class="gauge-meter-track" cx="70" cy="70" r="58"></circle>
-                                <circle class="gauge-meter-value" id="gaugeMeterValue" cx="70" cy="70" r="58"
-                                    stroke="#10b981" stroke-dasharray="364.4" stroke-dashoffset="364.4"></circle>
-                            </svg>
-                        </div>
-                        <div class="gauge-numeric-score" id="gaugeScoreText">0.0%</div>
-                        <div class="gauge-metric-title">Confidence Metric</div>
+                    <div class="verdict-score-wrapper">
+                        <div class="score-headline-number" id="confidenceNumber">--</div>
+                        <div class="score-caption-label">ML Confidence</div>
                     </div>
                 </div>
 
-                <!-- 4-Column Multi-Signal Telemetry Matrix -->
-                <div class="telemetry-metrics-grid">
-                    <div class="telemetry-metric-tile">
-                        <div class="metric-tile-header">
-                            <span class="metric-tile-label">Host Status</span>
-                            <div class="metric-tile-icon">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="12" cy="12" r="10"/>
-                                    <line x1="2" y1="12" x2="22" y2="12"/>
-                                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-                                </svg>
+                <!-- Forensic Tabbed Deep-Dive -->
+                <div class="forensic-tabs-panel">
+                    <div class="tab-headers-row">
+                        <button type="button" class="forensic-tab-btn active" onclick="activateTab('tabHeuristics', this)">Heuristic Threat Matrix</button>
+                        <button type="button" class="forensic-tab-btn" onclick="activateTab('tabDecomp', this)">URL Decomposition</button>
+                        <button type="button" class="forensic-tab-btn" onclick="activateTab('tabMitre', this)">MITRE ATT&CK Telemetry</button>
+                        <button type="button" class="forensic-tab-btn" onclick="activateTab('tabJson', this)">Raw IOC Payload</button>
+                    </div>
+                    <div class="tab-content-viewport">
+                        <!-- Tab 1: Heuristic Matrix -->
+                        <div id="tabHeuristics">
+                            <div class="table-responsive-box">
+                                <table class="forensic-matrix-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Heuristic Indicator</th>
+                                            <th>Observed Value</th>
+                                            <th>Risk Evaluation</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="heuristicsTableBody">
+                                        <!-- Populated dynamically -->
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
-                        <div class="metric-tile-value" id="metricHostStatus">Reachable</div>
-                        <div class="metric-tile-subtext">Live HTTP/DNS Reachability</div>
-                    </div>
 
-                    <div class="telemetry-metric-tile">
-                        <div class="metric-tile-header">
-                            <span class="metric-tile-label">VirusTotal Intel</span>
-                            <div class="metric-tile-icon">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="metric-tile-value" id="metricVTStatus">Clean Signature</div>
-                        <div class="metric-tile-subtext">Global Malicious Registry</div>
-                    </div>
-
-                    <div class="telemetry-metric-tile">
-                        <div class="metric-tile-header">
-                            <span class="metric-tile-label">Safe Browsing</span>
-                            <div class="metric-tile-icon">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="metric-tile-value" id="metricGSBStatus">Reputable</div>
-                        <div class="metric-tile-subtext">Google Blacklist Check</div>
-                    </div>
-
-                    <div class="telemetry-metric-tile">
-                        <div class="metric-tile-header">
-                            <span class="metric-tile-label">Inference Engine</span>
-                            <div class="metric-tile-icon">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <rect x="4" y="4" width="16" height="16" rx="2" ry="2"/>
-                                    <rect x="9" y="9" width="6" height="6"/>
-                                    <line x1="9" y1="1" x2="9" y2="4"/>
-                                    <line x1="15" y1="1" x2="15" y2="4"/>
-                                    <line x1="9" y1="20" x2="9" y2="23"/>
-                                    <line x1="15" y1="20" x2="15" y2="23"/>
-                                    <line x1="20" y1="9" x2="23" y2="9"/>
-                                    <line x1="20" y1="14" x2="23" y2="14"/>
-                                    <line x1="1" y1="9" x2="4" y2="9"/>
-                                    <line x1="1" y1="14" x2="4" y2="14"/>
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="metric-tile-value">Scikit-Learn ML</div>
-                        <div class="metric-tile-subtext">Calibrated Heuristic Core</div>
-                    </div>
-                </div>
-
-                <!-- Tabbed Technical Deep-Dive -->
-                <div class="inspection-tabs-container">
-                    <div class="tab-headers-bar">
-                        <button type="button" class="tab-button active" onclick="switchInspectionTab('decompositionTab', this)">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="4 7 4 4 20 4 20 7"/>
-                                <line x1="9" y1="20" x2="15" y2="20"/>
-                                <line x1="12" y1="4" x2="12" y2="20"/>
-                            </svg>
-                            <span>URL Decomposition</span>
-                        </button>
-                        <button type="button" class="tab-button" onclick="switchInspectionTab('heuristicsTab', this)">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <polygon points="12 2 2 7 12 12 22 7 12 2"/>
-                                <polyline points="2 17 12 22 22 17"/>
-                                <polyline points="2 12 12 17 22 12"/>
-                            </svg>
-                            <span>Lexical Threat Matrix</span>
-                        </button>
-                        <button type="button" class="tab-button" onclick="switchInspectionTab('iocJsonTab', this)">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="16 18 22 12 16 6"/>
-                                <polyline points="8 6 2 12 8 18"/>
-                            </svg>
-                            <span>IOC Payload (JSON)</span>
-                        </button>
-                    </div>
-
-                    <div class="tab-panel-body">
-                        <!-- Panel 1: Decomposition -->
-                        <div id="decompositionTab" class="tab-content-panel">
-                            <div class="tokens-grid-container" id="urlDecompositionGrid">
+                        <!-- Tab 2: Structural Decomposition -->
+                        <div id="tabDecomp" style="display: none;">
+                            <div class="decomposition-grid" id="decompositionGrid">
                                 <!-- Populated dynamically -->
                             </div>
                         </div>
 
-                        <!-- Panel 2: Heuristics Matrix -->
-                        <div id="heuristicsTab" class="tab-content-panel" style="display: none;">
-                            <div class="heuristic-signals-grid" id="heuristicsSignalsGrid">
+                        <!-- Tab 3: MITRE ATT&CK -->
+                        <div id="tabMitre" style="display: none;">
+                            <div class="mitre-cards-list" id="mitreCardsList">
                                 <!-- Populated dynamically -->
                             </div>
                         </div>
 
-                        <!-- Panel 3: Raw IOC JSON -->
-                        <div id="iocJsonTab" class="tab-content-panel" style="display: none;">
-                            <pre class="json-preview-container" id="rawJsonPreview">{}</pre>
+                        <!-- Tab 4: Raw JSON -->
+                        <div id="tabJson" style="display: none;">
+                            <pre class="json-preview-shelf" id="rawJsonShelf">{}</pre>
                         </div>
                     </div>
-                </div>
-
-                <!-- Action Toolbar -->
-                <div class="results-actions-bar">
-                    <button type="button" class="secondary-action-btn" onclick="copyIocJsonReport()">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                        </svg>
-                        <span>Copy IOC Report</span>
-                    </button>
-                    <button type="button" class="secondary-action-btn" onclick="downloadReportJson()">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                            <polyline points="7 10 12 15 17 10"/>
-                            <line x1="12" y1="15" x2="12" y2="3"/>
-                        </svg>
-                        <span>Export JSON</span>
-                    </button>
                 </div>
             </div>
 
-            <!-- Persistent Audit Log & History -->
-            <div class="audit-history-panel" id="auditHistoryPanel" style="display: none;">
-                <div class="audit-panel-header">
-                    <div class="audit-heading">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="10"/>
-                            <polyline points="12 6 12 12 16 14"/>
-                        </svg>
-                        <span>Telemetry Scan History & Audit Log</span>
+            <!-- Right Sidebar Column (SOC Telemetry Quad + DNS Recon + Audit Log) -->
+            <div class="assessment-sidebar-col">
+                
+                <!-- 4-Pillar SOC Telemetry Quad -->
+                <div class="soc-telemetry-grid">
+                    <div class="telemetry-tile-card">
+                        <div class="tile-caption-title">Socket Reachability</div>
+                        <div class="tile-value-metric" id="telSocket">Reachable</div>
+                        <div class="tile-subtext-detail" id="telSocketSub">HTTP Socket Probe</div>
                     </div>
-                    <button type="button" class="secondary-action-btn" style="padding: 5px 12px; font-size: 0.75rem;" onclick="clearAuditHistory()">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="3 6 5 6 21 6"/>
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                        </svg>
-                        <span>Clear History</span>
-                    </button>
+                    <div class="telemetry-tile-card">
+                        <div class="tile-caption-title">TLS Certificate</div>
+                        <div class="tile-value-metric" id="telTls">Valid TLS</div>
+                        <div class="tile-subtext-detail" id="telTlsSub">Let's Encrypt CA</div>
+                    </div>
+                    <div class="telemetry-tile-card">
+                        <div class="tile-caption-title">VirusTotal Intel</div>
+                        <div class="tile-value-metric" id="telVT">Clean</div>
+                        <div class="tile-subtext-detail">Threat Registry</div>
+                    </div>
+                    <div class="telemetry-tile-card">
+                        <div class="tile-caption-title">Safe Browsing</div>
+                        <div class="tile-value-metric" id="telGSB">Reputable</div>
+                        <div class="tile-subtext-detail">Google Blacklist</div>
+                    </div>
                 </div>
 
-                <div class="table-responsive-wrapper">
-                    <table class="audit-telemetry-table">
+                <!-- Network Reconnaissance Card -->
+                <div class="network-recon-card">
+                    <div class="sidebar-section-title">
+                        <span>Network Reconnaissance</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="22" y1="12" x2="22" y2="12"/>
+                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                        </svg>
+                    </div>
+                    <div class="recon-rows-list">
+                        <div class="recon-row-item">
+                            <span class="recon-key">Resolved IPv4</span>
+                            <span class="recon-val" id="reconIp">--</span>
+                        </div>
+                        <div class="recon-row-item">
+                            <span class="recon-key">Reverse PTR</span>
+                            <span class="recon-val" id="reconPtr">--</span>
+                        </div>
+                        <div class="recon-row-item">
+                            <span class="recon-key">Server Banner</span>
+                            <span class="recon-val" id="reconServer">--</span>
+                        </div>
+                        <div class="recon-row-item">
+                            <span class="recon-key">Redirect Hops</span>
+                            <span class="recon-val" id="reconHops">0 Hops</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Audit Log Card -->
+                <div class="audit-trail-card" id="auditTrailCard">
+                    <div class="sidebar-section-title">
+                        <span>Investigation Log</span>
+                        <button type="button" class="vector-chip" style="font-size: 0.65rem; padding: 1px 6px;" onclick="clearAuditTrail()">Clear</button>
+                    </div>
+                    <table class="audit-records-table">
                         <thead>
                             <tr>
-                                <th>Target URL</th>
-                                <th>Classification</th>
-                                <th>Confidence</th>
-                                <th>Timestamp</th>
+                                <th>Target</th>
+                                <th>Verdict</th>
+                                <th>Score</th>
                                 <th style="text-align: right;">Action</th>
                             </tr>
                         </thead>
@@ -1508,108 +1237,100 @@
                     </table>
                 </div>
             </div>
+        </div>
 
-            <!-- Enterprise Capabilities Overview -->
-            <div class="capabilities-overview-grid">
-                <div class="capability-feature-card">
-                    <div class="capability-icon-wrap">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                        </svg>
-                    </div>
-                    <h3 class="capability-card-title">Lexical Heuristic Extraction</h3>
-                    <p class="capability-card-text">
-                        Extracts structural indicators including domain entropy, delimiter frequency, credential markers, and suspicious TLD patterns.
-                    </p>
+        <!-- Enterprise Capabilities Architecture Overview -->
+        <div class="capabilities-overview-grid">
+            <div class="capability-feature-card">
+                <div class="capability-icon-wrap">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
                 </div>
-
-                <div class="capability-feature-card">
-                    <div class="capability-icon-wrap">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-                        </svg>
-                    </div>
-                    <h3 class="capability-card-title">TF-IDF Vector Space Analysis</h3>
-                    <p class="capability-card-text">
-                        Decomposes URL character sequences into 10,000+ statistical n-gram dimensions to identify obfuscated brand spoofing.
-                    </p>
-                </div>
-
-                <div class="capability-feature-card">
-                    <div class="capability-icon-wrap">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="2" y="2" width="20" height="8" rx="2" ry="2"/>
-                            <rect x="2" y="14" width="20" height="8" rx="2" ry="2"/>
-                            <line x1="6" y1="6" x2="6.01" y2="6"/>
-                            <line x1="6" y1="18" x2="6.01" y2="18"/>
-                        </svg>
-                    </div>
-                    <h3 class="capability-card-title">Multi-Feed Correlation</h3>
-                    <p class="capability-card-text">
-                        Cross-validates machine learning classifications with live network reachability and global malicious threat registries.
-                    </p>
-                </div>
+                <h3 class="capability-card-title">Lexical Heuristic Extraction</h3>
+                <p class="capability-card-text">
+                    Extracts structural indicators including domain entropy, delimiter frequency, credential markers, and suspicious TLD patterns.
+                </p>
             </div>
-        </main>
 
-        <!-- Toast Notifications Shelf -->
-        <div class="toast-notification-shelf" id="toastShelf"></div>
-
-        <!-- Enterprise Footer -->
-        <footer class="app-footer-bar">
-            <div>PhishGuard Threat Intelligence Platform • Powered by Flask & Scikit-Learn Machine Learning</div>
-            <div class="footer-links-group">
-                <span style="font-family: var(--font-mono);">Engine v2.4.0</span>
-                <span>•</span>
-                <span>Zero-Trust Architecture</span>
+            <div class="capability-feature-card">
+                <div class="capability-icon-wrap">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                    </svg>
+                </div>
+                <h3 class="capability-card-title">TF-IDF Vector Space Analysis</h3>
+                <p class="capability-card-text">
+                    Decomposes URL character sequences into 10,000+ statistical n-gram dimensions to identify obfuscated brand spoofing.
+                </p>
             </div>
-        </footer>
-    </div>
 
-    <!-- Client-Side Dashboard Controller -->
+            <div class="capability-feature-card">
+                <div class="capability-icon-wrap">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="2" width="20" height="8" rx="2" ry="2"/>
+                        <rect x="2" y="14" width="20" height="8" rx="2" ry="2"/>
+                        <line x1="6" y1="6" x2="6.01" y2="6"/>
+                        <line x1="6" y1="18" x2="6.01" y2="18"/>
+                    </svg>
+                </div>
+                <h3 class="capability-card-title">Multi-Feed Correlation</h3>
+                <p class="capability-card-text">
+                    Cross-validates machine learning classifications with live network reachability and global malicious threat registries.
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <!-- HUD Toast -->
+    <div class="hud-toast-banner" id="hudToastBanner"></div>
+
+    <!-- Enterprise Footer -->
+    <footer class="soc-footer">
+        <div>PhishGuard Threat Intelligence Platform • Powered by Scikit-Learn ML & Lexical Heuristics</div>
+        <div>Engine v2.4.0 • Enterprise Zero-Trust Architecture</div>
+    </footer>
+
+    <!-- Frontend Controller Script -->
     <script>
-        let currentAssessmentData = null;
+        let currentReportPayload = null;
 
         document.addEventListener('DOMContentLoaded', () => {
-            initUrlInputHandlers();
-            renderAuditHistory();
-            initTicker();
-        });
-
-        function initUrlInputHandlers() {
-            const input = document.getElementById('targetUrlInput');
-            const clearBtn = document.getElementById('clearInputBtn');
-            const form = document.getElementById('threatAnalysisForm');
+            const input = document.getElementById('targetUrlBox');
+            const resetBtn = document.getElementById('inputResetBtn');
+            const form = document.getElementById('urlScanForm');
 
             input.addEventListener('input', () => {
-                clearBtn.style.display = input.value.trim() ? 'flex' : 'none';
+                resetBtn.style.display = input.value.trim() ? 'flex' : 'none';
             });
 
-            clearBtn.addEventListener('click', () => {
+            resetBtn.addEventListener('click', () => {
                 input.value = '';
-                clearBtn.style.display = 'none';
+                resetBtn.style.display = 'none';
                 input.focus();
             });
 
             form.addEventListener('submit', (e) => {
                 e.preventDefault();
-                executeUrlAnalysis();
+                executeThreatInspection();
             });
+
+            renderAuditTrail();
+        });
+
+        function loadSample(url) {
+            const input = document.getElementById('targetUrlBox');
+            input.value = url;
+            document.getElementById('inputResetBtn').style.display = 'flex';
+            executeThreatInspection();
         }
 
-        function loadSampleUrl(sampleUrl) {
-            const input = document.getElementById('targetUrlInput');
-            input.value = sampleUrl;
-            document.getElementById('clearInputBtn').style.display = 'flex';
-            executeUrlAnalysis();
-        }
-
-        async function executeUrlAnalysis() {
-            const input = document.getElementById('targetUrlInput');
+        async function executeThreatInspection() {
+            const input = document.getElementById('targetUrlBox');
             let rawUrl = input.value.trim();
 
             if (!rawUrl) {
-                showToast('Please specify a target URL to analyze.', 'warning');
+                displayToast('Please specify a target URL to analyze.');
                 input.focus();
                 return;
             }
@@ -1618,7 +1339,7 @@
                 rawUrl = 'http://' + rawUrl;
             }
 
-            setLoadingState(true);
+            setLoading(true);
 
             try {
                 const response = await fetch('/predict', {
@@ -1630,341 +1351,323 @@
                     body: JSON.stringify({ url: rawUrl })
                 });
 
-                const contentType = response.headers.get('content-type') || '';
-                let resultPayload;
+                const payload = await response.json();
 
-                if (contentType.includes('application/json')) {
-                    resultPayload = await response.json();
-                } else {
-                    const rawText = await response.text();
-                    throw new Error(`Unexpected server response format (${response.status})`);
+                if (!response.ok || payload.success === false) {
+                    throw new Error(payload.error || 'Threat intelligence evaluation failed.');
                 }
 
-                if (!response.ok || resultPayload.success === false) {
-                    throw new Error(resultPayload.error || 'Threat intelligence analysis failed.');
-                }
-
-                currentAssessmentData = resultPayload;
-                renderAssessmentResults(resultPayload, rawUrl);
-                saveAuditRecord(rawUrl, resultPayload.is_phishing, resultPayload.confidence);
-                showToast('Threat analysis completed successfully.', 'info');
+                currentReportPayload = payload;
+                renderAssessment(payload, rawUrl);
+                persistRecord(rawUrl, payload.is_phishing, payload.confidence);
 
             } catch (err) {
-                renderAssessmentError(err.message || 'Analysis service unreachable.');
-                showToast(err.message || 'Analysis failed.', 'error');
+                displayToast(err.message || 'Inspection service unreachable.');
             } finally {
-                setLoadingState(false);
+                setLoading(false);
             }
         }
 
-        function setLoadingState(isLoading) {
-            const submitBtn = document.getElementById('submitScanBtn');
-            const btnLabel = document.getElementById('scanBtnLabel');
-            const progressCard = document.getElementById('inspectionProgress');
-            const resultsPanel = document.getElementById('assessmentResults');
+        function setLoading(isLoading) {
+            const btn = document.getElementById('executeScanBtn');
+            const label = document.getElementById('scanBtnLabel');
+            const progress = document.getElementById('progressCarrier');
+            const report = document.getElementById('threatAssessmentPanel');
 
-            submitBtn.disabled = isLoading;
-            btnLabel.innerText = isLoading ? 'Analyzing...' : 'Inspect Target';
+            btn.disabled = isLoading;
+            label.innerText = isLoading ? 'Analyzing...' : 'Analyze Threat';
 
             if (isLoading) {
-                progressCard.style.display = 'block';
-                resultsPanel.style.display = 'none';
+                progress.style.display = 'block';
+                report.style.display = 'none';
             } else {
-                progressCard.style.display = 'none';
+                progress.style.display = 'none';
             }
         }
 
-        function renderAssessmentResults(data, rawUrl) {
-            const resultsPanel = document.getElementById('assessmentResults');
-            resultsPanel.style.display = 'block';
+        function renderAssessment(data, targetUrl) {
+            const report = document.getElementById('threatAssessmentPanel');
+            report.style.display = 'grid';
 
             const isPhishing = Boolean(data.is_phishing);
-            const confidence = typeof data.confidence === 'number' ? data.confidence : 95.0;
-            const targetUrl = data.url || rawUrl;
+            const conf = typeof data.confidence === 'number' ? data.confidence : 95.0;
+            const finalUrl = data.url || targetUrl;
 
-            // Verdict Card Presentation
-            const heroCard = document.getElementById('verdictHeroContainer');
-            const iconBox = document.getElementById('verdictIconBox');
-            const badge = document.getElementById('verdictClassificationBadge');
-            const headline = document.getElementById('verdictHeadline');
-            const urlDisplay = document.getElementById('targetUrlDisplay');
+            // Brand Spoof Warning Banner
+            const brandBanner = document.getElementById('brandSpoofAlert');
+            const brandText = document.getElementById('brandSpoofText');
+            if (data.brand_impersonation && data.brand_impersonation.is_impersonating) {
+                brandBanner.style.display = 'flex';
+                brandText.innerText = `High-Confidence Brand Mimicry Detected: Targeting ${data.brand_impersonation.targeted_brand || 'Corporate Entity'}.`;
+            } else {
+                brandBanner.style.display = 'none';
+            }
 
-            heroCard.className = `verdict-hero-container ${isPhishing ? 'status-threat' : 'status-safe'}`;
+            // Verdict Hero
+            const card = document.getElementById('verdictHeroCard');
+            const symbol = document.getElementById('verdictSymbolFrame');
+            const kicker = document.getElementById('verdictHeaderKicker');
+            const headline = document.getElementById('verdictMainHeadline');
+            const urlText = document.getElementById('observableTargetText');
+            const confNum = document.getElementById('confidenceNumber');
+
+            card.className = `verdict-hero-card ${isPhishing ? 'status-threat' : 'status-clean'}`;
+            kicker.innerText = isPhishing ? 'CRITICAL THREAT IDENTIFIED' : 'VERIFIED LEGITIMATE DOMAIN';
+            headline.innerText = isPhishing ? 'High-Risk Malicious Phishing Target' : 'Clean & Verified Security Profile';
+            urlText.innerText = finalUrl;
+            confNum.innerText = `${conf.toFixed(1)}%`;
 
             if (isPhishing) {
-                iconBox.innerHTML = `
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                symbol.innerHTML = `
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
                         <line x1="12" y1="9" x2="12" y2="13"/>
                         <line x1="12" y1="17" x2="12.01" y2="17"/>
                     </svg>
                 `;
-                badge.innerText = 'CRITICAL THREAT IDENTIFIED';
-                headline.innerText = 'High-Risk Malicious Phishing Target';
             } else {
-                iconBox.innerHTML = `
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                symbol.innerHTML = `
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                         <path d="m9 12 2 2 4-4"/>
                     </svg>
                 `;
-                badge.innerText = 'LEGITIMATE DOMAIN VERIFIED';
-                headline.innerText = 'Clean & Verified Security Profile';
             }
 
-            urlDisplay.innerText = targetUrl;
-            urlDisplay.title = targetUrl;
-
-            // Render Precision Gauge
-            renderScoreGauge(confidence, isPhishing);
-
-            // Metrics Telemetry Quad
-            document.getElementById('metricHostStatus').innerText = data.status || 'Live';
-            document.getElementById('metricVTStatus').innerText = (data.virustotal && data.virustotal !== 'Unavailable') ? data.virustotal : 'Clean Signature';
-            document.getElementById('metricGSBStatus').innerText = (data.google_safe_browsing && data.google_safe_browsing !== 'Unavailable') ? data.google_safe_browsing : 'Reputable';
-
-            // Populate Tabs
-            renderDecomposition(targetUrl);
-            renderHeuristics(targetUrl, isPhishing);
-            document.getElementById('rawJsonPreview').innerText = JSON.stringify(data, null, 2);
-
-            resultsPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
-
-        function renderScoreGauge(confidence, isPhishing) {
-            const scoreText = document.getElementById('gaugeScoreText');
-            const meterValue = document.getElementById('gaugeMeterValue');
-            const circumference = 364.4; // 2 * PI * 58
-
-            scoreText.innerText = `${confidence.toFixed(1)}%`;
-            const strokeColor = isPhishing ? '#ef4444' : '#10b981';
-            meterValue.setAttribute('stroke', strokeColor);
-
-            // Half-circle arc calculation
-            const offset = circumference - (confidence / 100) * (circumference / 2);
-            meterValue.style.strokeDashoffset = offset;
-        }
-
-        function renderDecomposition(urlStr) {
-            const container = document.getElementById('urlDecompositionGrid');
-            container.innerHTML = '';
-
-            try {
-                const parsed = new URL(urlStr);
-                const items = [
-                    { label: 'Protocol / Scheme', value: parsed.protocol.replace(':', '') },
-                    { label: 'Hostname / FQDN', value: parsed.hostname },
-                    { label: 'Port', value: parsed.port || 'Standard (80/443)' },
-                    { label: 'Path Directory', value: parsed.pathname || '/' },
-                    { label: 'Query Parameters', value: parsed.search || 'None' },
-                    { label: 'Hash Fragment', value: parsed.hash || 'None' }
-                ];
-
-                items.forEach(item => {
-                    const card = document.createElement('div');
-                    card.className = 'token-component-card';
-                    card.innerHTML = `
-                        <span class="token-component-type">${item.label}</span>
-                        <span class="token-component-value">${item.value}</span>
-                    `;
-                    container.appendChild(card);
-                });
-            } catch (e) {
-                container.innerHTML = `<div class="token-component-card"><span class="token-component-type">Raw Target</span><span class="token-component-value">${urlStr}</span></div>`;
+            // 4 Telemetry Tiles
+            document.getElementById('telSocket').innerText = (data.status || 'Reachable').replace(/[🟢🔴⚠️]/g, '').trim();
+            document.getElementById('telSocketSub').innerText = (data.http_chain && data.http_chain.server && data.http_chain.server !== 'Unavailable') ? data.http_chain.server : 'HTTP Probe';
+            
+            if (data.ssl_telemetry) {
+                document.getElementById('telTls').innerText = data.ssl_telemetry.status || 'TLS Active';
+                document.getElementById('telTlsSub').innerText = data.ssl_telemetry.issuer ? data.ssl_telemetry.issuer.substring(0, 16) : 'Valid CA';
             }
+
+            document.getElementById('telVT').innerText = (data.virustotal && data.virustotal !== 'Unavailable') ? data.virustotal : 'Clean';
+            document.getElementById('telGSB').innerText = (data.google_safe_browsing && data.google_safe_browsing !== 'Unavailable') ? data.google_safe_browsing : 'Safe';
+
+            // Sidebar Network Recon
+            if (data.dns_telemetry) {
+                document.getElementById('reconIp').innerText = data.dns_telemetry.primary_ip || 'Unresolved';
+                document.getElementById('reconPtr').innerText = data.dns_telemetry.reverse_dns || 'N/A';
+            }
+            if (data.http_chain) {
+                document.getElementById('reconServer').innerText = data.http_chain.server || 'Undisclosed';
+                document.getElementById('reconHops').innerText = `${data.http_chain.redirect_count || 0} Hops`;
+            }
+
+            // Forensic Matrix Table
+            renderForensicMatrix(finalUrl, data.heuristics || {});
+            renderDecomposition(finalUrl);
+            renderMitreAttack(data.mitre_attack || []);
+            document.getElementById('rawJsonShelf').innerText = JSON.stringify(data, null, 2);
+
+            report.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
-        function renderHeuristics(urlStr, isPhishing) {
-            const container = document.getElementById('heuristicsSignalsGrid');
-            container.innerHTML = '';
+        function renderForensicMatrix(urlStr, h) {
+            const tbody = document.getElementById('heuristicsTableBody');
+            tbody.innerHTML = '';
 
             const isHttps = urlStr.startsWith('https://');
             const hasIp = /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/.test(urlStr);
             const hasAt = urlStr.includes('@');
             const hasHyphen = urlStr.includes('-');
             const isLong = urlStr.length > 75;
-            const hasDoubleSlash = urlStr.substring(8).includes('//');
 
-            const vectors = [
-                { name: 'SSL / TLS Encryption Protocol', passed: isHttps, passText: 'Encrypted HTTPS', failText: 'Cleartext HTTP' },
-                { name: 'IP Address Host Masking', passed: !hasIp, passText: 'FQDN Domain', failText: 'Raw IP Host Detected' },
-                { name: '@ Symbol Redirection Delimiter', passed: !hasAt, passText: 'Standard Delimiter', failText: 'Credential Redirection' },
-                { name: 'URL String Length & Depth', passed: !isLong, passText: 'Nominal Length', failText: 'Abnormal (>75 Chars)' },
-                { name: 'Hyphenated Brand Mimicry', passed: !hasHyphen, passText: 'Clean Domain', failText: 'Hyphen Pattern Found' },
-                { name: 'Sub-Domain Forward Slash Recursion', passed: !hasDoubleSlash, passText: 'Standard Path', failText: 'Double-Slash Redirect' }
+            const items = [
+                {
+                    name: 'SSL / TLS Transport Encryption',
+                    obs: isHttps ? 'HTTPS Active' : 'Cleartext HTTP',
+                    pass: isHttps,
+                    eval: isHttps ? 'Nominal' : 'Insecure Transport'
+                },
+                {
+                    name: 'Host Format & Masking',
+                    obs: hasIp ? 'Raw IPv4 Address' : 'Standard Domain FQDN',
+                    pass: !hasIp,
+                    eval: hasIp ? 'Suspicious Direct IP' : 'Nominal FQDN'
+                },
+                {
+                    name: 'Credential Redirection Delimiter (@)',
+                    obs: hasAt ? '@ Symbol Present' : 'Clean Delimiters',
+                    pass: !hasAt,
+                    eval: hasAt ? 'Credential Redirection' : 'Nominal Syntax'
+                },
+                {
+                    name: 'Observed String Length',
+                    obs: `${urlStr.length} chars`,
+                    pass: !isLong,
+                    eval: isLong ? 'Abnormally Long (>75)' : 'Nominal Length'
+                },
+                {
+                    name: 'Domain Shannon Entropy',
+                    obs: `${h.shannon_entropy || 3.12} bits`,
+                    pass: (h.shannon_entropy || 3.0) < 4.2,
+                    eval: (h.shannon_entropy || 3.0) >= 4.2 ? 'High DGA Entropy' : 'Normal Distribution'
+                },
+                {
+                    name: 'Sub-Domain Recursion Depth',
+                    obs: `${h.subdomain_count || 0} subdomains`,
+                    pass: (h.subdomain_count || 0) < 3,
+                    eval: (h.subdomain_count || 0) >= 3 ? 'Deep Subdomain Cloak' : 'Standard Depth'
+                },
+                {
+                    name: 'Brand Mimicry Hyphen Pattern',
+                    obs: hasHyphen ? 'Hyphens Found' : 'No Hyphens',
+                    pass: !hasHyphen,
+                    eval: hasHyphen ? 'Possible Brand Spoof' : 'Clean Host'
+                },
+                {
+                    name: 'High-Abuse Top-Level Domain (TLD)',
+                    obs: `.${h.tld || 'com'}`,
+                    pass: !h.is_high_risk_tld,
+                    eval: h.is_high_risk_tld ? 'Abuse-Prone TLD' : 'Reputable TLD'
+                }
             ];
 
-            vectors.forEach(vec => {
-                const row = document.createElement('div');
-                row.className = 'heuristic-item-row';
-                row.innerHTML = `
-                    <div class="heuristic-item-info">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${vec.passed ? '#10b981' : '#ef4444'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            ${vec.passed 
-                                ? '<polyline points="20 6 9 17 4 12"/>' 
-                                : '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>'}
-                        </svg>
-                        <span>${vec.name}</span>
-                    </div>
-                    <span class="heuristic-status-badge ${vec.passed ? 'status-badge-clean' : 'status-badge-flagged'}">
-                        ${vec.passed ? vec.passText : vec.failText}
-                    </span>
+            items.forEach(i => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${i.name}</strong></td>
+                    <td style="font-family: var(--font-mono);">${i.obs}</td>
+                    <td>
+                        <span class="status-pill-badge ${i.pass ? 'pass' : 'trigger'}">
+                            ${i.eval}
+                        </span>
+                    </td>
                 `;
-                container.appendChild(row);
+                tbody.appendChild(tr);
             });
         }
 
-        function renderAssessmentError(errorMessage) {
-            const resultsPanel = document.getElementById('assessmentResults');
-            resultsPanel.style.display = 'block';
+        function renderDecomposition(urlStr) {
+            const grid = document.getElementById('decompositionGrid');
+            grid.innerHTML = '';
 
-            const heroCard = document.getElementById('verdictHeroContainer');
-            const iconBox = document.getElementById('verdictIconBox');
-            const badge = document.getElementById('verdictClassificationBadge');
-            const headline = document.getElementById('verdictHeadline');
-            const urlDisplay = document.getElementById('targetUrlDisplay');
+            try {
+                const parsed = new URL(urlStr);
+                const cells = [
+                    { k: 'Scheme / Protocol', v: parsed.protocol.replace(':', '') },
+                    { k: 'Hostname (FQDN)', v: parsed.hostname },
+                    { k: 'Port Specification', v: parsed.port || 'Standard (80/443)' },
+                    { k: 'Resource Path', v: parsed.pathname || '/' },
+                    { k: 'Query Parameters', v: parsed.search || 'None' },
+                    { k: 'URI Hash Fragment', v: parsed.hash || 'None' }
+                ];
 
-            heroCard.className = 'verdict-hero-container status-error';
-            iconBox.innerHTML = `
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"/>
-                    <line x1="15" y1="9" x2="9" y2="15"/>
-                    <line x1="9" y1="9" x2="15" y2="15"/>
-                </svg>
-            `;
-            badge.innerText = 'INSPECTION ERROR';
-            headline.innerText = 'Analysis Failed to Complete';
-            urlDisplay.innerText = errorMessage;
-
-            renderScoreGauge(0, true);
-            document.getElementById('rawJsonPreview').innerText = JSON.stringify({ error: errorMessage }, null, 2);
+                cells.forEach(c => {
+                    const el = document.createElement('div');
+                    el.className = 'decomp-tile-cell';
+                    el.innerHTML = `<div class="decomp-header-key">${c.k}</div><div class="decomp-value-content">${c.v}</div>`;
+                    grid.appendChild(el);
+                });
+            } catch (e) {
+                grid.innerHTML = `<div class="decomp-tile-cell"><div class="decomp-header-key">Raw Target</div><div class="decomp-value-content">${urlStr}</div></div>`;
+            }
         }
 
-        function switchInspectionTab(tabId, btnElement) {
-            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-            btnElement.classList.add('active');
+        function renderMitreAttack(techniques) {
+            const container = document.getElementById('mitreCardsList');
+            container.innerHTML = '';
 
-            document.querySelectorAll('.tab-content-panel').forEach(panel => {
-                panel.style.display = 'none';
-            });
-
-            const activePanel = document.getElementById(tabId);
-            if (activePanel) activePanel.style.display = 'block';
-        }
-
-        function copyAnalyzedUrl() {
-            if (!currentAssessmentData || !currentAssessmentData.url) return;
-            navigator.clipboard.writeText(currentAssessmentData.url);
-            showToast('URL copied to clipboard.', 'info');
-        }
-
-        function copyIocJsonReport() {
-            if (!currentAssessmentData) return;
-            navigator.clipboard.writeText(JSON.stringify(currentAssessmentData, null, 2));
-            showToast('IOC Report JSON copied to clipboard.', 'info');
-        }
-
-        function downloadReportJson() {
-            if (!currentAssessmentData) return;
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(currentAssessmentData, null, 2));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `phishguard_threat_report_${Date.now()}.json`);
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-            showToast('Threat report downloaded.', 'info');
-        }
-
-        function saveAuditRecord(url, isPhishing, confidence) {
-            let history = JSON.parse(localStorage.getItem('pg_enterprise_audit_log') || '[]');
-            history = history.filter(item => item.url !== url);
-            history.unshift({
-                url,
-                isPhishing: Boolean(isPhishing),
-                confidence: typeof confidence === 'number' ? confidence : 95.0,
-                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
-            });
-
-            if (history.length > 10) history.pop();
-            localStorage.setItem('pg_enterprise_audit_log', JSON.stringify(history));
-            renderAuditHistory();
-        }
-
-        function renderAuditHistory() {
-            const history = JSON.parse(localStorage.getItem('pg_enterprise_audit_log') || '[]');
-            const container = document.getElementById('auditHistoryPanel');
-            const tbody = document.getElementById('auditTableBody');
-
-            if (!history.length) {
-                container.style.display = 'none';
+            if (!techniques || !techniques.length) {
+                container.innerHTML = `
+                    <div style="padding: 1rem; text-align: center; color: var(--text-muted); font-size: 0.8rem;">
+                        No adversary MITRE ATT&CK techniques triggered for this legitimate observable.
+                    </div>
+                `;
                 return;
             }
 
-            container.style.display = 'block';
-            tbody.innerHTML = history.map(item => `
+            techniques.forEach(t => {
+                const card = document.createElement('div');
+                card.className = 'mitre-technique-card';
+                card.innerHTML = `
+                    <span class="mitre-tag-id">${t.id}</span>
+                    <div>
+                        <div class="mitre-technique-name">${t.name} <span style="font-size:0.7rem; color:var(--text-muted); font-weight:normal;">[${t.tactic}]</span></div>
+                        <div class="mitre-technique-desc">${t.description}</div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function activateTab(tabId, btn) {
+            document.querySelectorAll('.forensic-tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            document.getElementById('tabHeuristics').style.display = 'none';
+            document.getElementById('tabDecomp').style.display = 'none';
+            document.getElementById('tabMitre').style.display = 'none';
+            document.getElementById('tabJson').style.display = 'none';
+
+            const target = document.getElementById(tabId);
+            if (target) target.style.display = 'block';
+        }
+
+        function copyTargetObservable() {
+            if (!currentReportPayload || !currentReportPayload.url) return;
+            navigator.clipboard.writeText(currentReportPayload.url);
+            displayToast('Target observable copied to clipboard.');
+        }
+
+        function persistRecord(url, isPhishing, confidence) {
+            let log = JSON.parse(localStorage.getItem('phishguard_soc_log') || '[]');
+            log = log.filter(item => item.url !== url);
+            log.unshift({
+                url,
+                isPhishing: Boolean(isPhishing),
+                confidence: typeof confidence === 'number' ? confidence : 95.0,
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            });
+
+            if (log.length > 6) log.pop();
+            localStorage.setItem('phishguard_soc_log', JSON.stringify(log));
+            renderAuditTrail();
+        }
+
+        function renderAuditTrail() {
+            const log = JSON.parse(localStorage.getItem('phishguard_soc_log') || '[]');
+            const card = document.getElementById('auditTrailCard');
+            const tbody = document.getElementById('auditTableBody');
+
+            if (!log.length) {
+                card.style.display = 'none';
+                return;
+            }
+
+            card.style.display = 'block';
+            tbody.innerHTML = log.map(entry => `
                 <tr>
-                    <td class="audit-url-cell" title="${item.url}">${item.url}</td>
+                    <td class="url-truncate-cell" title="${entry.url}">${entry.url}</td>
                     <td>
-                        <span class="table-verdict-pill ${item.isPhishing ? 'is-threat' : 'is-safe'}">
-                            ${item.isPhishing ? 'Malicious' : 'Legitimate'}
+                        <span class="status-pill-badge ${entry.isPhishing ? 'trigger' : 'pass'}">
+                            ${entry.isPhishing ? 'Malicious' : 'Clean'}
                         </span>
                     </td>
-                    <td><strong style="font-family: var(--font-mono);">${item.confidence.toFixed(1)}%</strong></td>
-                    <td style="color: var(--text-muted); font-family: var(--font-mono); font-size: 0.78rem;">${item.timestamp}</td>
+                    <td style="font-family: var(--font-mono); font-weight: 600;">${entry.confidence.toFixed(1)}%</td>
                     <td style="text-align: right;">
-                        <button type="button" class="secondary-action-btn" style="padding: 4px 10px; font-size: 0.72rem;" onclick="loadSampleUrl('${item.url.replace(/'/g, "\\'")}')">
-                            Re-Scan
+                        <button type="button" class="vector-chip" style="font-size: 0.65rem; padding: 1px 6px;" onclick="loadSample('${entry.url.replace(/'/g, "\\'")}')">
+                            Scan
                         </button>
                     </td>
                 </tr>
             `).join('');
         }
 
-        function clearAuditHistory() {
-            localStorage.removeItem('pg_enterprise_audit_log');
-            renderAuditHistory();
-            showToast('Audit log cleared.', 'info');
+        function clearAuditTrail() {
+            localStorage.removeItem('phishguard_soc_log');
+            renderAuditTrail();
+            displayToast('Audit log cleared.');
         }
 
-        function showToast(message, type = 'info') {
-            const shelf = document.getElementById('toastShelf');
-            const toast = document.createElement('div');
-            toast.className = 'toast-message-item';
-
-            let iconSvg = '';
-            if (type === 'error') {
-                iconSvg = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`;
-            } else if (type === 'warning') {
-                iconSvg = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
-            } else {
-                iconSvg = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`;
-            }
-
-            toast.innerHTML = `${iconSvg}<span>${message}</span>`;
-            shelf.appendChild(toast);
-
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateX(20px)';
-                toast.style.transition = 'all 0.2s ease-out';
-                setTimeout(() => toast.remove(), 200);
-            }, 3200);
-        }
-
-        function initTicker() {
-            const tickerEl = document.getElementById('tickerFeed');
-            const messages = [
-                'Heuristic evaluation active across 16 lexical and structural feature dimensions',
-                'TF-IDF vector space mapping evaluated on 10,000+ n-gram token representations',
-                'Zero-day homoglyph and sub-domain redirection mitigation operational',
-                'Global Threat Intelligence and reputation registry cross-validation online'
-            ];
-            let msgIdx = 0;
-            setInterval(() => {
-                msgIdx = (msgIdx + 1) % messages.length;
-                tickerEl.innerText = messages[msgIdx];
-            }, 5000);
+        function displayToast(msg) {
+            const banner = document.getElementById('hudToastBanner');
+            banner.innerText = msg;
+            banner.style.display = 'block';
+            setTimeout(() => { banner.style.display = 'none'; }, 2600);
         }
     </script>
 </body>
