@@ -96,6 +96,8 @@ def health_check():
 # MAIN UI CONSOLE ROUTE
 # --------------------------------------------------
 @app.route("/", methods=["GET"])
+@app.route("/api", methods=["GET"])
+@app.route("/api/index", methods=["GET"])
 def home():
     return render_template("index.html")
 
@@ -103,6 +105,8 @@ def home():
 # PREDICTION & THREAT INTELLIGENCE ENGINE ROUTE
 # --------------------------------------------------
 @app.route("/predict", methods=["POST"])
+@app.route("/api/predict", methods=["POST"])
+@app.route("/api/index/predict", methods=["POST"])
 @app.route("/api/v1/scan", methods=["POST"])
 def predict():
     is_json_request = (
