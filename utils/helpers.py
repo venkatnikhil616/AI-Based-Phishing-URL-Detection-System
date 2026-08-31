@@ -1,11 +1,12 @@
-import numpy as np
-
-
 def format_features(features):
-    return np.asarray(
-        features,
-        dtype=float
-    ).reshape(1, -1)
+    try:
+        import numpy as np
+        return np.asarray(
+            features,
+            dtype=float
+        ).reshape(1, -1)
+    except Exception:
+        return [features]
 
 
 def interpret_result(prediction):

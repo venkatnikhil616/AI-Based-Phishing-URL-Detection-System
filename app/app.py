@@ -8,7 +8,10 @@ import urllib3
 # Suppress self-signed certificate warnings during live SSL/HTTP forensic probes
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-import numpy as np
+try:
+    import numpy as np
+except Exception:
+    np = None
 from flask import Flask, render_template, request, jsonify
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
