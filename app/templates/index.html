@@ -1106,6 +1106,88 @@
             box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.25);
         }
 
+        .viewfinder-fallback {
+            position: absolute;
+            inset: 0;
+            background: rgba(11, 16, 25, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.25rem;
+            text-align: center;
+            z-index: 10;
+        }
+
+        .fallback-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(244, 63, 94, 0.12);
+            border: 1px solid rgba(244, 63, 94, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.65rem;
+            color: var(--threat);
+        }
+
+        .fallback-title {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 0.3rem;
+        }
+
+        .fallback-desc {
+            font-size: 0.76rem;
+            color: var(--text-secondary);
+            max-width: 340px;
+            line-height: 1.4;
+            margin-bottom: 0.9rem;
+        }
+
+        .fallback-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .fallback-btn {
+            border-radius: var(--radius-xs);
+            font-size: 0.76rem;
+            font-weight: 600;
+            font-family: var(--font-sans);
+            padding: 7px 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s ease;
+        }
+
+        .fallback-btn.primary {
+            background: var(--primary);
+            color: #ffffff;
+            border: none;
+        }
+
+        .fallback-btn.primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .fallback-btn.secondary {
+            background: var(--bg-elevated);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-medium);
+        }
+
+        .fallback-btn.secondary:hover {
+            color: #ffffff;
+            border-color: var(--border-focus);
+        }
+
         .ocr-capture-row {
             margin-top: 0.85rem;
             display: flex;
@@ -1568,7 +1650,32 @@
                 <video class="viewfinder-video" id="cameraVideo" playsinline autoplay muted></video>
                 <canvas id="qrCanvas" style="display: none;"></canvas>
                 <div class="viewfinder-laser" id="viewfinderLaser"></div>
-                <div class="viewfinder-reticle"></div>
+                <div class="viewfinder-reticle" id="viewfinderReticle"></div>
+
+                <!-- Fallback Overlay for Permission Blocked / No Camera -->
+                <div class="viewfinder-fallback" id="viewfinderFallback" style="display: none;">
+                    <div class="fallback-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="1" y1="1" x2="23" y2="23"/>
+                            <path d="M21 21H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3m3-3h6l2 3h4a2 2 0 0 1 2 2v9.34"/>
+                            <circle cx="12" cy="13" r="4"/>
+                        </svg>
+                    </div>
+                    <div class="fallback-title" id="fallbackTitle">Camera Blocked or Unavailable</div>
+                    <p class="fallback-desc" id="fallbackDesc">
+                        Click the <strong>🔒 lock / site settings icon</strong> in your URL bar to allow camera access, or upload a QR image directly below.
+                    </p>
+                    <div class="fallback-actions">
+                        <button type="button" class="fallback-btn primary" onclick="document.getElementById('qrFileInput').click()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            <span>Upload QR Image</span>
+                        </button>
+                        <button type="button" class="fallback-btn secondary" onclick="openCameraScanner()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                            <span>Retry Camera</span>
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <!-- OCR Capture Button (Visible in OCR mode) -->
@@ -1651,16 +1758,27 @@
             const video = document.getElementById('cameraVideo');
             const statusDot = document.getElementById('cameraStatusDot');
             const statusText = document.getElementById('cameraStatusText');
+            const fallback = document.getElementById('viewfinderFallback');
+            const fallbackTitle = document.getElementById('fallbackTitle');
+            const fallbackDesc = document.getElementById('fallbackDesc');
+            const laser = document.getElementById('viewfinderLaser');
 
             modal.style.display = 'flex';
             statusDot.className = 'status-dot';
             statusText.innerText = 'Requesting camera permissions from browser...';
+            if (fallback) fallback.style.display = 'none';
 
             // Check for Secure Context (HTTPS or localhost required for camera)
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                 statusDot.className = 'status-dot error';
                 statusText.innerText = 'Camera blocked: Browser requires HTTPS or localhost for camera access.';
                 displayToast('Camera API requires HTTPS or localhost secure context.');
+                if (fallback) {
+                    fallback.style.display = 'flex';
+                    fallbackTitle.innerText = 'Secure Context Required';
+                    fallbackDesc.innerHTML = 'Browsers require <strong>HTTPS</strong> or <strong>localhost</strong> for camera access. You can upload an image file instead.';
+                }
+                if (laser) laser.style.display = 'none';
                 return;
             }
 
@@ -1686,6 +1804,9 @@
                 video.setAttribute("playsinline", true);
                 await video.play();
 
+                if (fallback) fallback.style.display = 'none';
+                if (laser && activeCameraMode === 'qr') laser.style.display = 'block';
+
                 statusDot.className = 'status-dot active';
                 statusText.innerText = 'Camera Online • Viewfinder Active';
 
@@ -1699,16 +1820,33 @@
             } catch (err) {
                 console.error("Camera permission / access error:", err);
                 statusDot.className = 'status-dot error';
+                if (laser) laser.style.display = 'none';
+
+                if (fallback) {
+                    fallback.style.display = 'flex';
+                }
 
                 if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
                     statusText.innerText = 'Camera permission blocked. Click the 🔒 lock icon in your URL bar to allow camera.';
                     displayToast('Permission denied. Please click the 🔒 lock icon in the address bar to reset permissions.');
+                    if (fallback) {
+                        fallbackTitle.innerText = 'Camera Permission Blocked';
+                        fallbackDesc.innerHTML = 'Click the <strong>🔒 lock / site settings icon</strong> in your browser URL bar and change Camera to <strong>Allow</strong>, or upload a QR image below.';
+                    }
                 } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
                     statusText.innerText = 'No physical camera hardware found on this system.';
                     displayToast('No camera found on this device.');
+                    if (fallback) {
+                        fallbackTitle.innerText = 'No Camera Hardware Found';
+                        fallbackDesc.innerHTML = 'No physical or virtual webcam was detected on this machine. You can directly upload a QR code or screenshot below.';
+                    }
                 } else {
                     statusText.innerText = `Camera unavailable (${err.name || 'Hardware in use'}).`;
                     displayToast('Camera is currently in use by another app or unavailable.');
+                    if (fallback) {
+                        fallbackTitle.innerText = 'Camera Device Unavailable';
+                        fallbackDesc.innerHTML = `Camera error (${err.name || 'in use'}). You can upload a QR image file directly to proceed.`;
+                    }
                 }
             }
         }
@@ -1716,6 +1854,7 @@
         function closeCameraScanner() {
             const modal = document.getElementById('cameraScannerModal');
             const video = document.getElementById('cameraVideo');
+            const fallback = document.getElementById('viewfinderFallback');
 
             if (qrScanInterval) {
                 cancelAnimationFrame(qrScanInterval);
@@ -1729,6 +1868,10 @@
 
             if (video) {
                 video.srcObject = null;
+            }
+
+            if (fallback) {
+                fallback.style.display = 'none';
             }
 
             isProcessingFrame = false;
