@@ -1801,47 +1801,31 @@
             }
 
             try {
-                // Progressive Camera Acquisition: 4 fallback tiers
-                let stream = null;
+                // Resilient Progressive Camera Acquisition: from ideal facing mode to zero-constraint fallback
+                const constraintCandidates = [
+                    { video: { facingMode: currentFacingMode }, audio: false },
+                    { video: { facingMode: currentFacingMode === 'environment' ? 'user' : 'environment' }, audio: false },
+                    { video: true, audio: false },
+                    { video: {} }
+                ];
 
-                // Tier 1: Selected facing mode with resolution request
-                try {
-                    stream = await navigator.mediaDevices.getUserMedia({
-                        video: {
-                            facingMode: { ideal: currentFacingMode },
-                            width: { ideal: 1280 }
-                        },
-                        audio: false
-                    });
-                } catch (t1) {
-                    // Tier 2: Opposite facing mode
+                let stream = null;
+                let lastErr = null;
+
+                for (const constraints of constraintCandidates) {
                     try {
-                        const altFacing = currentFacingMode === 'environment' ? 'user' : 'environment';
-                        stream = await navigator.mediaDevices.getUserMedia({
-                            video: { facingMode: altFacing },
-                            audio: false
-                        });
-                    } catch (t2) {
-                        // Tier 3: Any generic video stream
-                        try {
-                            stream = await navigator.mediaDevices.getUserMedia({
-                                video: true,
-                                audio: false
-                            });
-                        } catch (t3) {
-                            // Tier 4: Direct deviceId scan
-                            const devices = await navigator.mediaDevices.enumerateDevices();
-                            const videoDevices = devices.filter(d => d.kind === 'videoinput');
-                            if (videoDevices.length > 0) {
-                                stream = await navigator.mediaDevices.getUserMedia({
-                                    video: { deviceId: { exact: videoDevices[0].deviceId } },
-                                    audio: false
-                                });
-                            } else {
-                                throw t3;
-                            }
+                        stream = await navigator.mediaDevices.getUserMedia(constraints);
+                        if (stream && stream.getVideoTracks && stream.getVideoTracks().length > 0) {
+                            break;
                         }
+                    } catch (cErr) {
+                        lastErr = cErr;
+                        // Silently fallback to next relaxed constraint tier
                     }
+                }
+
+                if (!stream) {
+                    throw lastErr || new Error("Failed to acquire any camera stream.");
                 }
 
                 videoStream = stream;
