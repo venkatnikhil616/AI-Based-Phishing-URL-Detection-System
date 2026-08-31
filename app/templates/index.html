@@ -1827,22 +1827,22 @@
                 }
 
                 if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-                    statusText.innerText = 'Camera permission blocked. Click the 🔒 lock icon in your URL bar to allow camera.';
-                    displayToast('Permission denied. Please click the 🔒 lock icon in the address bar to reset permissions.');
+                    statusText.innerText = 'Camera permission blocked. Click the Site Settings / Tune icon (🎚️ / ℹ️) in your URL bar or upload an image.';
+                    displayToast('Permission blocked. Use the icon on the left of your URL bar or upload a file.');
                     if (fallback) {
                         fallbackTitle.innerText = 'Camera Permission Blocked';
-                        fallbackDesc.innerHTML = 'Click the <strong>🔒 lock / site settings icon</strong> in your browser URL bar and change Camera to <strong>Allow</strong>, or upload a QR image below.';
+                        fallbackDesc.innerHTML = 'Click the <strong>Tune / Settings icon (🎚️)</strong> or <strong>Info (ℹ️)</strong> on the left of your address bar to allow Camera, or upload a QR image below.';
                     }
                 } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
-                    statusText.innerText = 'No physical camera hardware found on this system.';
-                    displayToast('No camera found on this device.');
+                    statusText.innerText = 'No physical camera hardware found on this system. You can upload an image.';
+                    displayToast('No camera found. Please upload a QR code image.');
                     if (fallback) {
                         fallbackTitle.innerText = 'No Camera Hardware Found';
                         fallbackDesc.innerHTML = 'No physical or virtual webcam was detected on this machine. You can directly upload a QR code or screenshot below.';
                     }
                 } else {
-                    statusText.innerText = `Camera unavailable (${err.name || 'Hardware in use'}).`;
-                    displayToast('Camera is currently in use by another app or unavailable.');
+                    statusText.innerText = `Camera unavailable (${err.name || 'Hardware in use'}). Upload an image instead.`;
+                    displayToast('Camera is currently unavailable. Upload a QR image file.');
                     if (fallback) {
                         fallbackTitle.innerText = 'Camera Device Unavailable';
                         fallbackDesc.innerHTML = `Camera error (${err.name || 'in use'}). You can upload a QR image file directly to proceed.`;

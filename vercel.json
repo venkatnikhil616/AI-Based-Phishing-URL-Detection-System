@@ -2,13 +2,20 @@
   "version": 2,
   "functions": {
     "api/index.py": {
-      "includeFiles": "models/**,app/templates/**,app/static/**,features/**,utils/**,app/**"
+      "includeFiles": [
+        "models/**",
+        "app/templates/**",
+        "app/static/**",
+        "features/**",
+        "utils/**",
+        "app/**"
+      ]
     }
   },
-  "routes": [
+  "rewrites": [
     {
-      "src": "/(.*)",
-      "dest": "/api/index.py"
+      "source": "/(.*)",
+      "destination": "/api/index.py"
     }
   ]
 }
