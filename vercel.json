@@ -1,17 +1,4 @@
 {
-  "version": 2,
-  "functions": {
-    "api/index.py": {
-      "includeFiles": [
-        "models/**",
-        "app/templates/**",
-        "app/static/**",
-        "features/**",
-        "utils/**",
-        "app/**"
-      ]
-    }
-  },
   "rewrites": [
     {
       "source": "/(.*)",
