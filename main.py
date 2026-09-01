@@ -1,4 +1,5 @@
-import os                                       import pickle
+import os
+import pickle
 
 import numpy as np
 
@@ -10,22 +11,27 @@ from utils.helpers import interpret_result, confidence_score
 # --------------------------------------------------
 # PROJECT PATHS
 # --------------------------------------------------
-                                                BASE_DIR = os.path.abspath(
+
+BASE_DIR = os.path.abspath(
     os.path.dirname(__file__)
 )
 
-MODEL_PATH = os.path.join(                          BASE_DIR,
+MODEL_PATH = os.path.join(
+    BASE_DIR,
     "models",
     "model.pkl"
 )
-                                                SCALER_PATH = os.path.join(
+
+SCALER_PATH = os.path.join(
     BASE_DIR,
-    "models",                                       "scaler.pkl"
+    "models",
+    "scaler.pkl"
 )
 
 VECTORIZER_PATH = os.path.join(
     BASE_DIR,
-    "models",                                       "vectorizer.pkl"
+    "models",
+    "vectorizer.pkl"
 )
 
 
