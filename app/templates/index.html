@@ -2231,20 +2231,53 @@
 
             setLoading(true);
 
+            // Resilient candidate endpoints to support root deployments, Vercel subpaths, and reverse proxies
+            const baseUri = window.location.pathname.replace(/\/+$/, '');
+            const candidateEndpoints = [
+                '/predict',
+                '/api/predict',
+                '/api/index/predict',
+                baseUri ? (baseUri + '/predict') : null,
+                baseUri || '/'
+            ].filter(Boolean).filter((val, idx, arr) => arr.indexOf(val) === idx);
+
+            let payload = null;
+            let lastErrorMsg = null;
+
+            for (const endpoint of candidateEndpoints) {
+                try {
+                    const response = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ url: rawUrl })
+                    });
+
+                    const responseText = await response.text();
+                    let parsedData = null;
+                    try {
+                        parsedData = JSON.parse(responseText);
+                    } catch (parseErr) {
+                        // Response was HTML or non-JSON
+                        continue;
+                    }
+
+                    if (parsedData && (parsedData.success === true || parsedData.is_phishing !== undefined)) {
+                        payload = parsedData;
+                        break;
+                    } else if (parsedData && parsedData.error) {
+                        lastErrorMsg = parsedData.error;
+                    }
+                } catch (netErr) {
+                    // Try next candidate endpoint
+                }
+            }
+
             try {
-                const response = await fetch('/predict', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({ url: rawUrl })
-                });
-
-                const payload = await response.json();
-
-                if (!response.ok || payload.success === false) {
-                    throw new Error(payload.error || 'Threat intelligence evaluation failed.');
+                if (!payload) {
+                    throw new Error(lastErrorMsg || 'Threat intelligence evaluation failed. Please check server status.');
                 }
 
                 currentReportPayload = payload;

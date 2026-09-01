@@ -83,6 +83,7 @@ vectorizer = load_pickle_file(VECTORIZER_PATH, "TF-IDF vectorizer")
 # SYSTEM HEALTH & STATUS ROUTE
 # --------------------------------------------------
 @app.route("/api/v1/health", methods=["GET"])
+@app.route("/v1/health", methods=["GET"])
 def health_check():
     return jsonify({
         "status": "healthy",
@@ -95,19 +96,22 @@ def health_check():
 # --------------------------------------------------
 # MAIN UI CONSOLE ROUTE
 # --------------------------------------------------
-@app.route("/", methods=["GET"])
-@app.route("/api", methods=["GET"])
-@app.route("/api/index", methods=["GET"])
+@app.route("/", methods=["GET", "POST"])
+@app.route("/api", methods=["GET", "POST"])
+@app.route("/api/index", methods=["GET", "POST"])
 def home():
+    if request.method == "POST":
+        return predict()
     return render_template("index.html")
 
 # --------------------------------------------------
 # PREDICTION & THREAT INTELLIGENCE ENGINE ROUTE
 # --------------------------------------------------
-@app.route("/predict", methods=["POST"])
-@app.route("/api/predict", methods=["POST"])
-@app.route("/api/index/predict", methods=["POST"])
-@app.route("/api/v1/scan", methods=["POST"])
+@app.route("/predict", methods=["GET", "POST"])
+@app.route("/api/predict", methods=["GET", "POST"])
+@app.route("/api/index/predict", methods=["GET", "POST"])
+@app.route("/api/v1/scan", methods=["GET", "POST"])
+@app.route("/v1/scan", methods=["GET", "POST"])
 def predict():
     is_json_request = (
         request.is_json
@@ -118,6 +122,10 @@ def predict():
     if request.is_json:
         data = request.get_json(silent=True) or {}
         user_input = str(data.get("url", "")).strip()
+    elif request.method == "GET":
+        user_input = request.args.get("url", "").strip()
+        if not user_input:
+            return render_template("index.html")
     else:
         user_input = request.form.get("url", "").strip()
 
@@ -261,6 +269,56 @@ def predict():
     )
     return render_template("index.html", prediction_text=output)
 
+
+# --------------------------------------------------
+# GLOBAL ERROR HANDLERS (JSON-SAFE FOR SPA / APIS)
+# --------------------------------------------------
+@app.errorhandler(404)
+def handle_404(err):
+    if (
+        request.is_json
+        or "application/json" in request.headers.get("Accept", "")
+        or request.content_type == "application/json"
+    ):
+        return jsonify({"success": False, "error": "Requested endpoint was not found on this server."}), 404
+    return render_template("index.html"), 404
+
+@app.errorhandler(405)
+def handle_405(err):
+    if request.method == "POST":
+        return predict()
+    if (
+        request.is_json
+        or "application/json" in request.headers.get("Accept", "")
+        or request.content_type == "application/json"
+    ):
+        return jsonify({"success": False, "error": "Method not allowed for this endpoint."}), 405
+    return render_template("index.html"), 405
+
+@app.errorhandler(500)
+def handle_500(err):
+    app.logger.error("Internal Server Error 500: %s", err, exc_info=True)
+    if (
+        request.is_json
+        or "application/json" in request.headers.get("Accept", "")
+        or request.content_type == "application/json"
+    ):
+        return jsonify({"success": False, "error": f"Internal server error: {str(err)}"}), 500
+    return render_template("index.html", prediction_text=f"Server error: {str(err)}"), 500
+
+@app.errorhandler(Exception)
+def handle_general_exception(err):
+    app.logger.error("Unhandled Exception: %s", err, exc_info=True)
+    if (
+        request.is_json
+        or "application/json" in request.headers.get("Accept", "")
+        or request.content_type == "application/json"
+    ):
+        return jsonify({"success": False, "error": f"An unexpected server error occurred: {str(err)}"}), 500
+    return render_template("index.html", prediction_text=f"Error: {str(err)}"), 500
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
+
