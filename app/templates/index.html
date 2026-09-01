@@ -9,9 +9,15 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Client-Side Optical Recognition Engines (QR + OCR for printed text) -->
+    <!-- Client-Side Optical Recognition & Document Forensics (QR + OCR + PDF Parser) -->
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        if (typeof pdfjsLib !== 'undefined') {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        }
+    </script>
     
     <style>
         :root {
@@ -1289,18 +1295,286 @@
             z-index: 3000;
         }
 
-        /* Footer */
-        .soc-footer {
-            margin-top: auto;
-            border-top: 1px solid var(--border-subtle);
-            padding: 1rem 1.5rem;
+        /* Mode Switcher Tabs */
+        .mode-switcher-bar {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 0.85rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            padding-bottom: 0.65rem;
+        }
+
+        .mode-switch-btn {
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            transition: all 0.15s ease;
+        }
+
+        .mode-switch-btn:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .mode-switch-btn.active {
+            background: var(--bg-elevated);
+            border-color: var(--border-subtle);
+            color: #ffffff;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Bulk Triage Ingestion */
+        .bulk-input-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr);
+            gap: 12px;
+            margin-bottom: 0.85rem;
+        }
+
+        .bulk-textarea-carrier {
+            min-width: 0;
+        }
+
+        .bulk-textarea-input {
+            width: 100%;
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            font-size: 0.82rem;
+            padding: 10px 12px;
+            outline: none;
+            resize: vertical;
+            min-height: 110px;
+            transition: border-color 0.15s ease;
+            box-sizing: border-box;
+        }
+
+        .bulk-textarea-input:focus {
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 2px var(--primary-subtle);
+        }
+
+        .bulk-dropzone-carrier {
+            background: var(--bg-input);
+            border: 1.5px dashed var(--border-subtle);
+            border-radius: var(--radius-sm);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            cursor: pointer;
+            text-align: center;
+            gap: 4px;
+            color: var(--text-secondary);
+            transition: all 0.15s ease;
+        }
+
+        .bulk-dropzone-carrier:hover {
+            border-color: var(--primary);
+            background: var(--primary-subtle);
+            color: #ffffff;
+        }
+
+        .bulk-actions-bar {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            font-size: 0.72rem;
-            color: var(--text-muted);
+            flex-wrap: wrap;
+            gap: 10px;
+            padding-top: 0.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        /* Batch Results Display */
+        .batch-results-panel {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            margin-bottom: 2rem;
+            animation: reportSlideIn 0.2s ease-out;
+        }
+
+        .batch-summary-hero {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 14px;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .batch-stats-cluster {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .batch-summary-stat {
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-xs);
+            padding: 6px 14px;
+            text-align: center;
+            min-width: 90px;
+        }
+
+        .batch-summary-stat.stat-threat {
+            border-color: var(--threat-border);
+            background: var(--threat-bg);
+        }
+
+        .batch-summary-stat.stat-clean {
+            border-color: var(--clean-border);
+            background: var(--clean-bg);
+        }
+
+        .stat-num {
             font-family: var(--font-mono);
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #ffffff;
+            line-height: 1.1;
+        }
+
+        .stat-threat .stat-num { color: var(--threat); }
+        .stat-clean .stat-num { color: var(--clean); }
+
+        .stat-label {
+            font-size: 0.62rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .batch-triage-table {
             width: 100%;
+            border-collapse: collapse;
+            font-size: 0.78rem;
+            min-width: 600px;
+        }
+
+        .batch-triage-table th {
+            text-align: left;
+            padding: 8px 10px;
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .batch-triage-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            color: var(--text-secondary);
+            vertical-align: middle;
+        }
+
+        /* Incident Report Export Toolbar */
+        .report-export-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            padding: 8px 14px;
+            margin-bottom: 1rem;
+        }
+
+        .report-case-id {
+            font-family: var(--font-mono);
+            font-size: 0.74rem;
+            font-weight: 700;
+            color: #60a5fa;
+            letter-spacing: 0.04em;
+        }
+
+        .export-buttons-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .export-action-btn {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 5px 10px;
+            border-radius: var(--radius-xs);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.15s ease;
+        }
+
+        .export-action-btn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #ffffff;
+        }
+
+        /* Printable Incident Report Sheet */
+        @media print {
+            body {
+                background: #ffffff !important;
+                color: #0f172a !important;
+            }
+            .top-navbar, .omnibar-row, .threat-chips-bar, .mode-switcher-bar, #bulkScanContainer,
+            #openCameraBtn, .inline-action-icon-btn, .export-buttons-group, .soc-footer,
+            .forensic-tabs-panel .tab-headers-row, .hud-toast-banner {
+                display: none !important;
+            }
+            .workspace-shell {
+                margin: 0 !important;
+                padding: 0 !important;
+                max-width: 100% !important;
+            }
+            .assessment-command-grid {
+                display: block !important;
+            }
+            .verdict-hero-card {
+                background: #f8fafc !important;
+                border: 2px solid #334155 !important;
+                color: #0f172a !important;
+                page-break-inside: avoid;
+            }
+            .verdict-main-headline, .score-headline-number, .tile-value-metric {
+                color: #0f172a !important;
+            }
+            .verdict-score-wrapper, .decomp-tile-cell, .telemetry-tile-card, .network-recon-card {
+                background: #ffffff !important;
+                border: 1px solid #cbd5e1 !important;
+                color: #0f172a !important;
+            }
+            .forensic-matrix-table th, .forensic-matrix-table td {
+                color: #334155 !important;
+                border-bottom: 1px solid #e2e8f0 !important;
+            }
+            .status-pill-badge {
+                border: 1px solid #94a3b8 !important;
+            }
         }
 
         /* Tablet & Mobile Media Queries */
@@ -1406,58 +1680,133 @@
 
         <!-- Ingestion Omnibar -->
         <div class="ingestion-card">
-            <form id="urlScanForm" onsubmit="return false;">
-                <div class="omnibar-row">
-                    <div class="input-carrier">
-                        <div class="carrier-prefix-icon">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="11" cy="11" r="8"/>
-                                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                            </svg>
+            <!-- Mode Switcher Tabs -->
+            <div class="mode-switcher-bar">
+                <button type="button" class="mode-switch-btn active" id="singleScanModeBtn" onclick="switchScanMode('single')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    <span>Single Observable / Optical OCR</span>
+                </button>
+                <button type="button" class="mode-switch-btn" id="bulkScanModeBtn" onclick="switchScanMode('bulk')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                    </svg>
+                    <span>Batch / Bulk CSV Triage</span>
+                </button>
+            </div>
+
+            <!-- Mode 1: Single URL Omnibar -->
+            <div id="singleScanContainer">
+                <form id="urlScanForm" onsubmit="return false;">
+                    <div class="omnibar-row">
+                        <div class="input-carrier">
+                            <div class="carrier-prefix-icon">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="11" cy="11" r="8"/>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                                </svg>
+                            </div>
+                            <input
+                                type="text"
+                                id="targetUrlBox"
+                                class="omnibar-text-input"
+                                placeholder="Enter FQDN, URL, or scan physical URL/QR (e.g. https://auth-verify.bank.com)"
+                                autocomplete="off"
+                                autocapitalize="none"
+                                autocorrect="off"
+                                spellcheck="false"
+                                required
+                            >
+                            <button type="button" class="input-reset-btn" id="inputResetBtn" title="Clear">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="18" y1="6" x2="6" y2="18"/>
+                                    <line x1="6" y1="6" x2="18" y2="18"/>
+                                </svg>
+                            </button>
                         </div>
-                        <input
-                            type="text"
-                            id="targetUrlBox"
-                            class="omnibar-text-input"
-                            placeholder="Enter FQDN, URL, or scan physical URL/QR (e.g. https://auth-verify.bank.com)"
-                            autocomplete="off"
-                            autocapitalize="none"
-                            autocorrect="off"
-                            spellcheck="false"
-                            required
-                        >
-                        <button type="button" class="input-reset-btn" id="inputResetBtn" title="Clear">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <line x1="18" y1="6" x2="6" y2="18"/>
-                                <line x1="6" y1="6" x2="18" y2="18"/>
+                        <!-- Device Camera & Optical OCR Trigger -->
+                        <button type="button" class="camera-trigger-btn" id="openCameraBtn" onclick="openCameraScanner()">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                                <circle cx="12" cy="13" r="4"/>
+                            </svg>
+                            <span>Camera Scanner</span>
+                        </button>
+                        <!-- PDF Document & Image Upload Trigger -->
+                        <button type="button" class="camera-trigger-btn" id="uploadPdfDocBtn" onclick="document.getElementById('singleDocUploadInput').click()" title="Scan PDF Document or Image for URLs / QR codes">
+                            <input type="file" id="singleDocUploadInput" accept=".pdf,image/*,application/pdf" style="display: none;" onchange="handleSingleDocUpload(event)">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                <polyline points="14 2 14 8 20 8"/>
+                                <line x1="16" y1="13" x2="8" y2="13"/>
+                                <line x1="16" y1="17" x2="8" y2="17"/>
+                            </svg>
+                            <span>Upload PDF / Image</span>
+                        </button>
+                        <button type="submit" class="scan-action-button" id="executeScanBtn">
+                            <span id="scanBtnLabel">Analyze Threat</span>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                                <polyline points="12 5 19 12 12 19"/>
                             </svg>
                         </button>
                     </div>
-                    <!-- Device Camera & Optical OCR Trigger -->
-                    <button type="button" class="camera-trigger-btn" id="openCameraBtn" onclick="openCameraScanner()">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-                            <circle cx="12" cy="13" r="4"/>
+
+                    <div class="threat-chips-bar">
+                        <span class="chips-label">Reference Vectors:</span>
+                        <button type="button" class="vector-chip tag-clean" onclick="loadSample('https://google.com')">google.com (Benign)</button>
+                        <button type="button" class="vector-chip tag-clean" onclick="loadSample('https://github.com/security')">github.com/security (Legitimate)</button>
+                        <button type="button" class="vector-chip tag-threat" onclick="loadSample('http://paypal-verification-update.tk/login.php')">paypal-spoof.tk (Phishing)</button>
+                        <button type="button" class="vector-chip tag-threat" onclick="loadSample('http://192.168.1.1/admin/login.php')">192.168.1.1 (Direct IP)</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Mode 2: Batch / Bulk URL Ingestion -->
+            <div id="bulkScanContainer" style="display: none;">
+                <div class="bulk-input-layout">
+                    <div class="bulk-textarea-carrier">
+                        <textarea
+                            id="bulkUrlTextarea"
+                            class="bulk-textarea-input"
+                            placeholder="Paste multiple URLs (one per line, up to 50 URLs)&#10;https://google.com&#10;http://paypal-security-update.tk/login&#10;https://github.com&#10;http://192.168.1.1/admin&#10;http://secure-login-bank.com"
+                            rows="5"
+                        ></textarea>
+                    </div>
+                    <div class="bulk-dropzone-carrier" id="bulkDropzone" onclick="document.getElementById('bulkFileInput').click()">
+                        <input type="file" id="bulkFileInput" accept=".txt,.csv,.pdf,application/pdf" style="display: none;" onchange="handleBulkFileUpload(event)">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                            <line x1="12" y1="18" x2="12" y2="12"/>
+                            <line x1="9" y1="15" x2="12" y2="12"/>
+                            <line x1="15" y1="15" x2="12" y2="12"/>
                         </svg>
-                        <span>Scan with Camera</span>
-                    </button>
-                    <button type="submit" class="scan-action-button" id="executeScanBtn">
-                        <span id="scanBtnLabel">Analyze Threat</span>
+                        <div style="font-size: 0.78rem; font-weight: 600; color: #fff;">Upload PDF / CSV / TXT</div>
+                        <div style="font-size: 0.68rem; color: var(--text-muted);">or drag & drop PDF documents</div>
+                    </div>
+                </div>
+
+                <div class="bulk-actions-bar">
+                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                        <button type="button" class="vector-chip" onclick="loadBulkSample()">Load 5 Sample URLs</button>
+                        <button type="button" class="vector-chip" onclick="clearBulkInput()">Clear</button>
+                        <span style="font-size: 0.72rem; color: var(--text-muted);" id="bulkCountLabel">0 URLs queued</span>
+                    </div>
+                    <button type="button" class="scan-action-button" id="executeBulkScanBtn" onclick="executeBatchInspection()">
+                        <span id="bulkScanBtnLabel">Triage Batch</span>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="5" y1="12" x2="19" y2="12"/>
                             <polyline points="12 5 19 12 12 19"/>
                         </svg>
                     </button>
                 </div>
-
-                <div class="threat-chips-bar">
-                    <span class="chips-label">Reference Vectors:</span>
-                    <button type="button" class="vector-chip tag-clean" onclick="loadSample('https://google.com')">google.com (Benign)</button>
-                    <button type="button" class="vector-chip tag-clean" onclick="loadSample('https://github.com/security')">github.com/security (Legitimate)</button>
-                    <button type="button" class="vector-chip tag-threat" onclick="loadSample('http://paypal-verification-update.tk/login.php')">paypal-spoof.tk (Phishing)</button>
-                    <button type="button" class="vector-chip tag-threat" onclick="loadSample('http://192.168.1.1/admin/login.php')">192.168.1.1 (Direct IP)</button>
-                </div>
-            </form>
+            </div>
         </div>
 
         <!-- Scanning Progress State -->
@@ -1465,7 +1814,55 @@
             <div class="progress-track-bar">
                 <div class="progress-sweep-fill"></div>
             </div>
-            <div class="progress-subtext-msg">Extracting lexical token dimensions • Computing TF-IDF vector projections...</div>
+            <div class="progress-subtext-msg" id="progressSubtextMsg">Extracting lexical token dimensions • Computing TF-IDF vector projections...</div>
+        </div>
+
+        <!-- Batch Results Triage Panel -->
+        <div class="batch-results-panel" id="batchResultsPanel" style="display: none;">
+            <div class="batch-summary-hero">
+                <div class="batch-stats-cluster">
+                    <div class="batch-summary-stat">
+                        <div class="stat-num" id="batchTotalCount">0</div>
+                        <div class="stat-label">Total Ingested</div>
+                    </div>
+                    <div class="batch-summary-stat stat-threat">
+                        <div class="stat-num" id="batchThreatCount">0</div>
+                        <div class="stat-label">Phishing Targets</div>
+                    </div>
+                    <div class="batch-summary-stat stat-clean">
+                        <div class="stat-num" id="batchCleanCount">0</div>
+                        <div class="stat-label">Legitimate Domains</div>
+                    </div>
+                </div>
+                <div>
+                    <button type="button" class="export-action-btn" onclick="exportBatchCsv()" style="padding: 8px 14px; font-size: 0.8rem; background: var(--primary); border-color: var(--primary);">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="7 10 12 15 17 10"/>
+                            <line x1="12" y1="15" x2="12" y2="3"/>
+                        </svg>
+                        <span>Download CSV Triage Report</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-responsive-box">
+                <table class="batch-triage-table">
+                    <thead>
+                        <tr>
+                            <th>Target Observable</th>
+                            <th>Classification Verdict</th>
+                            <th>ML Confidence</th>
+                            <th>Unified Risk Score</th>
+                            <th>Key Threat Indicators</th>
+                            <th style="text-align: right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="batchTriageTableBody">
+                        <!-- Rows injected by JS -->
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <!-- Threat Report 2-Column Assessment Command Center -->
@@ -1474,6 +1871,37 @@
             <!-- Left Main Column (Verdict + Detailed Tabs) -->
             <div class="assessment-main-col">
                 
+                <!-- Report Export Toolbar (PDF & JSON) -->
+                <div class="report-export-toolbar" id="reportExportToolbar">
+                    <span class="report-case-id" id="incidentCaseId">CASE #INC-2026-0901</span>
+                    <div class="export-buttons-group">
+                        <button type="button" class="export-action-btn" onclick="exportPdfIncidentReport()" title="Export Executive Printable PDF Report">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                <polyline points="14 2 14 8 20 8"/>
+                                <line x1="16" y1="13" x2="8" y2="13"/>
+                                <line x1="16" y1="17" x2="8" y2="17"/>
+                            </svg>
+                            <span>Export PDF Report</span>
+                        </button>
+                        <button type="button" class="export-action-btn" onclick="exportJsonIncidentPayload()" title="Export Machine-Readable JSON Payload">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="7 10 12 15 17 10"/>
+                                <line x1="12" y1="15" x2="12" y2="3"/>
+                            </svg>
+                            <span>Export JSON</span>
+                        </button>
+                        <button type="button" class="export-action-btn" onclick="copyMarkdownIncidentSummary()" title="Copy Markdown Incident Ticket for Jira/Slack">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            </svg>
+                            <span>Copy Summary</span>
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Brand Spoof Warning Banner (If impersonating) -->
                 <div class="brand-spoof-alert" id="brandSpoofAlert">
                     <span class="brand-alert-badge">Brand Mimicry</span>
@@ -1770,9 +2198,9 @@
             </p>
 
             <div class="file-dropzone-row">
-                <label class="vector-chip" style="cursor: pointer; padding: 6px 12px;">
-                    <span>📁 Upload Image File (QR / Text)</span>
-                    <input type="file" id="qrFileInput" accept="image/*" style="display: none;" onchange="handleQrFileUpload(event)">
+                <label class="vector-chip" style="cursor: pointer; padding: 6px 14px;">
+                    <span>📁 Upload PDF Document / QR Image File</span>
+                    <input type="file" id="qrFileInput" accept="image/*,.pdf,application/pdf" style="display: none;" onchange="handleQrFileUpload(event)">
                 </label>
             </div>
         </div>
@@ -2220,9 +2648,157 @@
             }
         }
 
-        function handleQrFileUpload(event) {
+        /* --------------------------------------------------
+           HIGH-CAPABILITY PDF DOCUMENT & OCR EXTRACTOR
+           -------------------------------------------------- */
+        async function parsePdfDocument(file) {
+            if (typeof pdfjsLib === 'undefined') {
+                throw new Error('PDF parsing library is initializing. Please wait a moment and try again.');
+            }
+
+            const arrayBuffer = await file.arrayBuffer();
+            const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+            const pdf = await loadingTask.promise;
+            const extractedUrls = new Set();
+            const numPages = Math.min(pdf.numPages, 30); // Scan up to 30 pages
+
+            const urlPattern = /(https?:\/\/[^\s<>"]+|(?:www\.)[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:\/[^\s<>"]*)?|[a-zA-Z0-9.-]+\.(?:com|org|net|edu|gov|io|co|in|xyz|tk|ml|ga|cf|top|club|vip|online|site|app|dev|me|info|biz)(?:\/[^\s<>"]*)?)/gi;
+
+            for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+                const page = await pdf.getPage(pageNum);
+
+                // 1. Text stream extraction
+                try {
+                    const textContent = await page.getTextContent();
+                    const fullPageText = textContent.items.map(item => item.str).join(' ');
+                    const matches = fullPageText.match(urlPattern);
+                    if (matches) {
+                        matches.forEach(m => {
+                            let cleaned = m.trim().replace(/[.,;:)>\]}"'`]+$/, '');
+                            if (cleaned.length > 4) {
+                                if (!cleaned.startsWith('http://') && !cleaned.startsWith('https://')) {
+                                    cleaned = 'http://' + cleaned;
+                                }
+                                extractedUrls.add(cleaned);
+                            }
+                        });
+                    }
+                } catch (tErr) {}
+
+                // 2. Embedded Hyperlink Annotations
+                try {
+                    const annotations = await page.getAnnotations();
+                    if (annotations && annotations.length) {
+                        annotations.forEach(annot => {
+                            const targetUrl = annot.url || annot.unsafeUrl;
+                            if (targetUrl && typeof targetUrl === 'string' && targetUrl.trim()) {
+                                let cleaned = targetUrl.trim().replace(/[.,;:)>\]}"'`]+$/, '');
+                                if (cleaned.startsWith('http://') || cleaned.startsWith('https://')) {
+                                    extractedUrls.add(cleaned);
+                                }
+                            }
+                        });
+                    }
+                } catch (aErr) {}
+
+                // 3. Embedded Anti-Quishing QR Code Scanner on Page Canvas
+                if (typeof jsQR !== 'undefined') {
+                    try {
+                        const viewport = page.getViewport({ scale: 1.5 });
+                        const offscreenCanvas = document.createElement('canvas');
+                        const offscreenCtx = offscreenCanvas.getContext('2d', { willReadFrequently: true });
+                        offscreenCanvas.width = viewport.width;
+                        offscreenCanvas.height = viewport.height;
+
+                        await page.render({
+                            canvasContext: offscreenCtx,
+                            viewport: viewport
+                        }).promise;
+
+                        const imgData = offscreenCtx.getImageData(0, 0, offscreenCanvas.width, offscreenCanvas.height);
+                        const qrCode = jsQR(imgData.data, offscreenCanvas.width, offscreenCanvas.height);
+                        if (qrCode && qrCode.data && qrCode.data.trim()) {
+                            let qrPayload = qrCode.data.trim();
+                            if (!qrPayload.startsWith('http://') && !qrPayload.startsWith('https://')) {
+                                qrPayload = 'http://' + qrPayload;
+                            }
+                            extractedUrls.add(qrPayload);
+                        }
+                    } catch (qrErr) {}
+                }
+            }
+
+            return Array.from(extractedUrls);
+        }
+
+        async function handleSingleDocUpload(event) {
             const file = event.target.files && event.target.files[0];
             if (!file) return;
+
+            displayToast(`Analyzing document: ${file.name}...`);
+
+            if (file.name.toLowerCase().endsWith('.pdf') || file.type === 'application/pdf') {
+                try {
+                    const urls = await parsePdfDocument(file);
+                    if (!urls.length) {
+                        displayToast('No URLs, links, or QR codes found in this PDF document.');
+                        return;
+                    }
+
+                    if (urls.length === 1) {
+                        const targetBox = document.getElementById('targetUrlBox');
+                        targetBox.value = urls[0];
+                        document.getElementById('inputResetBtn').style.display = 'flex';
+                        displayToast(`Extracted PDF link: ${urls[0]}`);
+                        executeThreatInspection();
+                    } else {
+                        displayToast(`Found ${urls.length} URLs in PDF. Triaging in Batch Mode...`);
+                        switchScanMode('bulk');
+                        document.getElementById('bulkUrlTextarea').value = urls.join('\n');
+                        updateBulkCount();
+                        executeBatchInspection();
+                    }
+                } catch (err) {
+                    console.error('PDF Parse Error:', err);
+                    displayToast('PDF parsing error: ' + (err.message || 'Check PDF format.'));
+                }
+            } else {
+                handleQrFileUpload(event);
+            }
+        }
+
+        async function handleQrFileUpload(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+
+            // If user uploads a PDF in the QR/Camera modal
+            if (file.name.toLowerCase().endsWith('.pdf') || file.type === 'application/pdf') {
+                displayToast(`Inspecting PDF document: ${file.name}...`);
+                try {
+                    const urls = await parsePdfDocument(file);
+                    if (!urls.length) {
+                        displayToast('No URLs or QR codes found inside this PDF.');
+                        return;
+                    }
+                    closeCameraScanner();
+                    if (urls.length === 1) {
+                        const targetBox = document.getElementById('targetUrlBox');
+                        targetBox.value = urls[0];
+                        document.getElementById('inputResetBtn').style.display = 'flex';
+                        displayToast(`Extracted URL from PDF: ${urls[0]}`);
+                        executeThreatInspection();
+                    } else {
+                        displayToast(`Found ${urls.length} URLs in PDF. Switched to Batch Triage.`);
+                        switchScanMode('bulk');
+                        document.getElementById('bulkUrlTextarea').value = urls.join('\n');
+                        updateBulkCount();
+                        executeBatchInspection();
+                    }
+                } catch (err) {
+                    displayToast('PDF parse failed: ' + err.message);
+                }
+                return;
+            }
 
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -2662,6 +3238,395 @@
             banner.style.display = 'block';
             setTimeout(() => { banner.style.display = 'none'; }, 2600);
         }
+
+        /* --------------------------------------------------
+           BATCH / BULK URL TRIAGE CONTROLLER
+           -------------------------------------------------- */
+        let currentBatchResults = [];
+
+        function switchScanMode(mode) {
+            const singleBtn = document.getElementById('singleScanModeBtn');
+            const bulkBtn = document.getElementById('bulkScanModeBtn');
+            const singleContainer = document.getElementById('singleScanContainer');
+            const bulkContainer = document.getElementById('bulkScanContainer');
+            const threatPanel = document.getElementById('threatAssessmentPanel');
+            const batchPanel = document.getElementById('batchResultsPanel');
+
+            if (mode === 'bulk') {
+                singleBtn.classList.remove('active');
+                bulkBtn.classList.add('active');
+                singleContainer.style.display = 'none';
+                bulkContainer.style.display = 'block';
+                threatPanel.style.display = 'none';
+                if (currentBatchResults.length > 0) {
+                    batchPanel.style.display = 'block';
+                }
+            } else {
+                bulkBtn.classList.remove('active');
+                singleBtn.classList.add('active');
+                bulkContainer.style.display = 'none';
+                singleContainer.style.display = 'block';
+                batchPanel.style.display = 'none';
+                if (currentReportPayload) {
+                    threatPanel.style.display = 'grid';
+                }
+            }
+        }
+
+        function loadBulkSample() {
+            const sampleUrls = [
+                'https://google.com',
+                'http://paypal-security-update.tk/login.php',
+                'https://github.com/security',
+                'http://192.168.1.1/admin/login.php',
+                'http://login-verify-account-bank.com',
+                'https://wikipedia.org'
+            ];
+            const textarea = document.getElementById('bulkUrlTextarea');
+            textarea.value = sampleUrls.join('\n');
+            updateBulkCount();
+            displayToast('Loaded 6 sample reference URLs for batch triage.');
+        }
+
+        function clearBulkInput() {
+            document.getElementById('bulkUrlTextarea').value = '';
+            const fileInp = document.getElementById('bulkFileInput');
+            if (fileInp) fileInp.value = '';
+            updateBulkCount();
+        }
+
+        async function handleBulkFileUpload(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+
+            displayToast(`Reading document file: ${file.name}...`);
+
+            // PDF processing path
+            if (file.name.toLowerCase().endsWith('.pdf') || file.type === 'application/pdf') {
+                try {
+                    const urls = await parsePdfDocument(file);
+                    if (!urls.length) {
+                        displayToast('No URLs, links, or QR codes found inside this PDF.');
+                        return;
+                    }
+                    const textarea = document.getElementById('bulkUrlTextarea');
+                    const existing = textarea.value.split('\n').map(l => l.trim()).filter(Boolean);
+                    const merged = Array.from(new Set([...existing, ...urls]));
+                    textarea.value = merged.join('\n');
+                    updateBulkCount();
+                    displayToast(`Extracted ${urls.length} URLs from PDF: ${file.name}`);
+                } catch (err) {
+                    console.error('PDF Batch Parse Error:', err);
+                    displayToast('PDF parsing error: ' + err.message);
+                }
+                return;
+            }
+
+            // CSV / TXT processing path
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+                const extractedUrls = [];
+                for (const line of lines) {
+                    const parts = line.split(/[,\t;]/);
+                    for (const p of parts) {
+                        const trimmed = p.trim().replace(/^["']|["']$/g, '');
+                        if (trimmed.includes('.') && (trimmed.startsWith('http') || trimmed.length > 4)) {
+                            extractedUrls.push(trimmed);
+                            break;
+                        }
+                    }
+                }
+                const finalUrls = extractedUrls.length > 0 ? extractedUrls : lines;
+                document.getElementById('bulkUrlTextarea').value = finalUrls.join('\n');
+                updateBulkCount();
+                displayToast(`Loaded ${finalUrls.length} URLs from ${file.name}`);
+            };
+            reader.readAsText(file);
+        }
+
+        function updateBulkCount() {
+            const textarea = document.getElementById('bulkUrlTextarea');
+            if (!textarea) return;
+            const lines = textarea.value.split('\n').map(l => l.trim()).filter(Boolean);
+            const label = document.getElementById('bulkCountLabel');
+            if (label) label.innerText = `${lines.length} URLs queued`;
+        }
+
+        document.getElementById('bulkUrlTextarea')?.addEventListener('input', updateBulkCount);
+
+        async function executeBatchInspection() {
+            const textarea = document.getElementById('bulkUrlTextarea');
+            const lines = textarea.value.split('\n').map(l => l.trim()).filter(Boolean);
+
+            if (!lines.length) {
+                displayToast('Please enter or upload URLs to triage.');
+                textarea.focus();
+                return;
+            }
+
+            const targetUrls = lines.slice(0, 50);
+            if (lines.length > 50) {
+                displayToast(`Processing first 50 of ${lines.length} URLs.`);
+            }
+
+            setBulkLoading(true);
+
+            try {
+                let batchData = null;
+                const baseUri = window.location.pathname.replace(/\/+$/, '');
+                const candidateBatchEndpoints = [
+                    '/batch-scan',
+                    '/api/batch-scan',
+                    '/api/v1/batch-scan',
+                    baseUri ? (baseUri + '/batch-scan') : null
+                ].filter(Boolean);
+
+                for (const ep of candidateBatchEndpoints) {
+                    try {
+                        const res = await fetch(ep, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                            body: JSON.stringify({ urls: targetUrls })
+                        });
+                        const txt = await res.text();
+                        try {
+                            const parsed = JSON.parse(txt);
+                            if (parsed && parsed.success) {
+                                batchData = parsed;
+                                break;
+                            }
+                        } catch (e) {}
+                    } catch (netErr) {}
+                }
+
+                // Resilient client fallback
+                if (!batchData || !batchData.results) {
+                    const clientResults = [];
+                    for (const u of targetUrls) {
+                        try {
+                            const res = await fetch('/predict', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ url: u })
+                            });
+                            const data = await res.json();
+                            clientResults.push(data.success ? data : { url: u, is_phishing: false, risk_level: 'UNKNOWN', risk_score: 50.0, confidence: 50.0, result: 'Unresolved' });
+                        } catch (err) {
+                            clientResults.push({ url: u, is_phishing: false, risk_level: 'ERROR', risk_score: 0, confidence: 0, result: 'Network Failure' });
+                        }
+                    }
+                    const phishCount = clientResults.filter(r => r.is_phishing).length;
+                    batchData = {
+                        success: true,
+                        total: clientResults.length,
+                        phishing_count: phishCount,
+                        clean_count: clientResults.length - phishCount,
+                        results: clientResults
+                    };
+                }
+
+                currentBatchResults = batchData.results || [];
+                renderBatchResults(batchData);
+                displayToast(`Batch triage completed: ${batchData.total} URLs analyzed.`);
+
+            } catch (err) {
+                displayToast('Batch scan error: ' + err.message);
+            } finally {
+                setBulkLoading(false);
+            }
+        }
+
+        function setBulkLoading(isLoading) {
+            const btn = document.getElementById('executeBulkScanBtn');
+            const label = document.getElementById('bulkScanBtnLabel');
+            const progress = document.getElementById('progressCarrier');
+            const subtext = document.getElementById('progressSubtextMsg');
+
+            if (btn) btn.disabled = isLoading;
+            if (label) label.innerText = isLoading ? 'Triaging...' : 'Triage Batch';
+
+            if (isLoading) {
+                progress.style.display = 'block';
+                if (subtext) subtext.innerText = 'Executing concurrent ML inference and multi-vector heuristic batch triage...';
+            } else {
+                progress.style.display = 'none';
+            }
+        }
+
+        function renderBatchResults(data) {
+            const panel = document.getElementById('batchResultsPanel');
+            panel.style.display = 'block';
+
+            document.getElementById('batchTotalCount').innerText = data.total || 0;
+            document.getElementById('batchThreatCount').innerText = data.phishing_count || 0;
+            document.getElementById('batchCleanCount').innerText = data.clean_count || 0;
+
+            const tbody = document.getElementById('batchTriageTableBody');
+            tbody.innerHTML = '';
+
+            (data.results || []).forEach((item) => {
+                const isPhish = Boolean(item.is_phishing);
+                const conf = typeof item.confidence === 'number' ? item.confidence : 90.0;
+                const riskScore = typeof item.risk_score === 'number' ? item.risk_score : (isPhish ? 90.0 : 10.0);
+                const riskLevel = item.risk_level || (isPhish ? 'HIGH' : 'LOW');
+
+                const tags = [];
+                if (item.brand_impersonation && item.brand_impersonation.is_impersonating) {
+                    tags.push(`<span class="status-pill-badge trigger">Spoof: ${item.brand_impersonation.targeted_brand || 'Brand'}</span>`);
+                }
+                if (item.heuristics && item.heuristics.is_high_risk_tld) {
+                    tags.push(`<span class="status-pill-badge trigger">Abuse TLD</span>`);
+                }
+                if (item.heuristics && item.heuristics.is_ip_address) {
+                    tags.push(`<span class="status-pill-badge trigger">Direct IP</span>`);
+                }
+                if (item.heuristics && item.heuristics.matched_keywords && item.heuristics.matched_keywords.length > 0) {
+                    tags.push(`<span class="status-pill-badge trigger">${item.heuristics.matched_keywords.slice(0, 2).join(', ')}</span>`);
+                }
+                if (tags.length === 0) {
+                    tags.push(`<span class="status-pill-badge pass">Nominal Telemetry</span>`);
+                }
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="url-truncate-cell" style="max-width: 260px;" title="${item.url}">
+                        <strong>${item.url}</strong>
+                    </td>
+                    <td>
+                        <span class="status-pill-badge ${isPhish ? 'trigger' : 'pass'}">
+                            ${isPhish ? 'Malicious Phishing' : 'Legitimate'}
+                        </span>
+                    </td>
+                    <td style="font-family: var(--font-mono); font-weight: 600;">${conf.toFixed(1)}%</td>
+                    <td>
+                        <span style="font-family: var(--font-mono); font-weight: 700; color: ${isPhish ? 'var(--threat)' : 'var(--clean)'};">
+                            ${riskScore}/100 [${riskLevel}]
+                        </span>
+                    </td>
+                    <td>${tags.join(' ')}</td>
+                    <td style="text-align: right;">
+                        <button type="button" class="vector-chip" style="font-size: 0.7rem; padding: 2px 8px;" onclick="inspectBatchItem('${(item.url || '').replace(/'/g, "\\'")}')">
+                            Deep Dive
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function inspectBatchItem(url) {
+            switchScanMode('single');
+            const input = document.getElementById('targetUrlBox');
+            input.value = url;
+            document.getElementById('inputResetBtn').style.display = 'flex';
+            executeThreatInspection();
+        }
+
+        function exportBatchCsv() {
+            if (!currentBatchResults || !currentBatchResults.length) {
+                displayToast('No batch results to export.');
+                return;
+            }
+
+            const headers = ['URL', 'Verdict', 'Is_Phishing', 'Risk_Level', 'Risk_Score', 'ML_Confidence_Percent', 'Brand_Impersonation', 'Status', 'Timestamp'];
+            const rows = currentBatchResults.map(r => [
+                `"${(r.url || '').replace(/"/g, '""')}"`,
+                `"${r.result || (r.is_phishing ? 'Malicious Phishing' : 'Legitimate')}"`,
+                r.is_phishing ? 'TRUE' : 'FALSE',
+                `"${r.risk_level || (r.is_phishing ? 'HIGH' : 'LOW')}"`,
+                r.risk_score || (r.is_phishing ? 90.0 : 10.0),
+                r.confidence || 90.0,
+                `"${(r.brand_impersonation && r.brand_impersonation.targeted_brand) ? r.brand_impersonation.targeted_brand : 'None'}"`,
+                `"${r.status || 'Reachable'}"`,
+                `"${r.timestamp || new Date().toISOString()}"`
+            ]);
+
+            const csvContent = [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `phishguard-batch-triage-${new Date().toISOString().slice(0, 10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            displayToast('Downloaded batch triage CSV report.');
+        }
+
+        /* --------------------------------------------------
+           EXECUTIVE INCIDENT REPORT EXPORT (PDF & JSON)
+           -------------------------------------------------- */
+        function exportPdfIncidentReport() {
+            if (!currentReportPayload) {
+                displayToast('Please perform an analysis before exporting a report.');
+                return;
+            }
+            const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+            const randSuffix = Math.floor(1000 + Math.random() * 9000);
+            const caseId = `INC-${dateStr}-${randSuffix}`;
+            document.getElementById('incidentCaseId').innerText = `CASE #${caseId}`;
+
+            window.print();
+        }
+
+        function exportJsonIncidentPayload() {
+            if (!currentReportPayload) {
+                displayToast('Please perform an analysis before exporting.');
+                return;
+            }
+            const jsonStr = JSON.stringify(currentReportPayload, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            const targetDomain = (currentReportPayload.url || 'target').replace(/[^a-zA-Z0-9]/g, '_').slice(0, 30);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `phishguard-incident-${targetDomain}-${new Date().toISOString().slice(0, 10)}.json`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            displayToast('Downloaded machine-readable JSON incident IOCs.');
+        }
+
+        function copyMarkdownIncidentSummary() {
+            if (!currentReportPayload) {
+                displayToast('No analysis available to copy.');
+                return;
+            }
+            const p = currentReportPayload;
+            const md = [
+                `### 🛡️ PhishGuard Cyber Incident Assessment Report`,
+                `- **Target Observable**: \`${p.url}\``,
+                `- **Verdict**: **${p.result}** (${p.confidence}% ML Confidence)`,
+                `- **Risk Level**: **${p.risk_level}** (Unified Risk Score: ${p.risk_score}/100)`,
+                `- **Network Status**: ${p.status}`,
+                `- **Brand Spoofing**: ${p.brand_impersonation && p.brand_impersonation.is_impersonating ? `⚠️ Impersonating ${p.brand_impersonation.targeted_brand}` : '✅ Verified Authentic / None'}`,
+                `- **TLS Security**: ${p.ssl_telemetry ? p.ssl_telemetry.status + ' (' + (p.ssl_telemetry.issuer || 'N/A') + ')' : 'N/A'}`,
+                `- **DNS A-Record**: ${p.dns_telemetry ? p.dns_telemetry.primary_ip : 'Unresolved'}`,
+                `- **Timestamp**: \`${p.timestamp}\``,
+                p.mitre_attack && p.mitre_attack.length ? `\n**MITRE ATT&CK Indicators:**\n` + p.mitre_attack.map(m => `- \`${m.id}\`: ${m.name} [${m.tactic}]`).join('\n') : ''
+            ].join('\n');
+
+            navigator.clipboard.writeText(md);
+            displayToast('Incident Markdown summary copied for Jira / Slack.');
+        }
+
+        // Automatic Shareable Query Parameter parsing: ?url=...
+        window.addEventListener('DOMContentLoaded', () => {
+            renderAuditTrail();
+            updateBulkCount();
+            const urlParams = new URLSearchParams(window.location.search);
+            const queryUrl = urlParams.get('url') || urlParams.get('target');
+            if (queryUrl && queryUrl.trim()) {
+                const targetBox = document.getElementById('targetUrlBox');
+                targetBox.value = queryUrl.trim();
+                document.getElementById('inputResetBtn').style.display = 'flex';
+                executeThreatInspection();
+            }
+        });
     </script>
 </body>
 </html>
