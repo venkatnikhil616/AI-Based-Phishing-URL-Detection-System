@@ -426,6 +426,10 @@
             color: #ffffff;
             align-items: center;
             gap: 10px;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            max-width: 100%;
+            box-sizing: border-box;
         }
 
         .brand-alert-badge {
@@ -438,6 +442,13 @@
             border-radius: var(--radius-xs);
             text-transform: uppercase;
             white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        #brandSpoofText {
+            flex: 1 1 auto;
+            min-width: 0;
+            word-break: break-word;
         }
 
         /* Executive Verdict Card */
@@ -445,11 +456,15 @@
             background: var(--bg-surface);
             border: 1px solid var(--border-subtle);
             border-radius: var(--radius-md);
-            padding: 1.35rem 1.5rem;
+            padding: 1.25rem 1.4rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 1.25rem;
+            overflow: hidden;
+            width: 100%;
+            box-sizing: border-box;
+            position: relative;
         }
 
         .verdict-hero-card.status-clean {
@@ -464,10 +479,20 @@
 
         .verdict-info-col {
             display: flex;
-            align-items: flex-start;
+            align-items: center;
             gap: 14px;
-            flex: 1;
+            flex: 1 1 auto;
             min-width: 0;
+            overflow: hidden;
+        }
+
+        .verdict-text-block {
+            flex: 1 1 auto;
+            min-width: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
         }
 
         .verdict-symbol-frame {
@@ -499,18 +524,23 @@
             text-transform: uppercase;
             letter-spacing: 0.08em;
             margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .status-clean .verdict-header-kicker { color: var(--clean); }
         .status-threat .verdict-header-kicker { color: var(--threat); }
 
         .verdict-main-headline {
-            font-size: 1.25rem;
+            font-size: 1.2rem;
             font-weight: 700;
             letter-spacing: -0.01em;
             color: #ffffff;
-            margin-bottom: 6px;
+            margin-bottom: 5px;
             line-height: 1.3;
+            word-break: break-word;
+            overflow-wrap: break-word;
         }
 
         .observable-carrier-box {
@@ -522,6 +552,9 @@
             border-radius: var(--radius-xs);
             padding: 4px 9px;
             max-width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+            overflow: hidden;
         }
 
         .observable-target-text {
@@ -531,7 +564,8 @@
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-            flex: 1;
+            flex: 1 1 auto;
+            min-width: 0;
         }
 
         .inline-action-icon-btn {
@@ -544,6 +578,7 @@
             padding: 3px;
             border-radius: 3px;
             transition: color 0.15s ease;
+            flex-shrink: 0;
         }
 
         .inline-action-icon-btn:hover {
@@ -554,19 +589,23 @@
             background: var(--bg-input);
             border: 1px solid var(--border-subtle);
             border-radius: var(--radius-sm);
-            padding: 0.85rem 1.35rem;
+            padding: 0.75rem 1.25rem;
             text-align: center;
-            min-width: 135px;
+            min-width: 120px;
+            max-width: 140px;
             flex-shrink: 0;
+            box-sizing: border-box;
+            margin-left: auto;
         }
 
         .score-headline-number {
             font-family: var(--font-mono);
-            font-size: 1.7rem;
+            font-size: 1.6rem;
             font-weight: 700;
             color: #ffffff;
-            line-height: 1;
+            line-height: 1.1;
             margin-bottom: 3px;
+            white-space: nowrap;
         }
 
         .score-caption-label {
@@ -575,6 +614,7 @@
             letter-spacing: 0.06em;
             color: var(--text-muted);
             font-weight: 600;
+            white-space: nowrap;
         }
 
         /* 4-Pillar SOC Telemetry Quad (Sidebar Grid) */
@@ -1279,6 +1319,30 @@
             }
         }
 
+        @media (max-width: 860px) {
+            .verdict-hero-card {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+            .verdict-score-wrapper {
+                max-width: 100%;
+                width: 100%;
+                margin-left: 0;
+                padding: 0.75rem 1.25rem;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+            .score-headline-number {
+                font-size: 1.4rem;
+                margin-bottom: 0;
+            }
+            .soc-telemetry-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
         @media (max-width: 768px) {
             .top-navbar { padding: 0.65rem 1rem; }
             .nav-telemetry-feed { display: none; }
@@ -1287,9 +1351,6 @@
             .omnibar-row { flex-direction: column; align-items: stretch; }
             .camera-trigger-btn { justify-content: center; width: 100%; min-height: 42px; }
             .scan-action-button { justify-content: center; width: 100%; min-height: 42px; }
-            .verdict-hero-card { flex-direction: column; align-items: stretch; }
-            .verdict-score-wrapper { width: 100%; text-align: center; }
-            .soc-telemetry-grid { grid-template-columns: repeat(2, 1fr); }
             .decomposition-grid { grid-template-columns: 1fr; }
             .soc-footer { flex-direction: column; gap: 8px; text-align: center; }
             .url-truncate-cell { max-width: 140px; }
@@ -1299,6 +1360,15 @@
             .soc-telemetry-grid { grid-template-columns: 1fr; }
             .threat-chips-bar { flex-direction: column; align-items: stretch; }
             .vector-chip { text-align: center; }
+            .verdict-info-col {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            .verdict-symbol-frame {
+                width: 36px;
+                height: 36px;
+            }
         }
     </style>
 </head>
@@ -1416,7 +1486,7 @@
                         <div class="verdict-symbol-frame" id="verdictSymbolFrame">
                             <!-- Injected by JS -->
                         </div>
-                        <div>
+                        <div class="verdict-text-block">
                             <div class="verdict-header-kicker" id="verdictHeaderKicker">CLASSIFICATION VERDICT</div>
                             <div class="verdict-main-headline" id="verdictMainHeadline">Threat Evaluation Completed</div>
                             <div class="observable-carrier-box">
